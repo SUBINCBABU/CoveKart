@@ -3,9 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-    production: true,
-    URL: 'https://angular.pixelstrap.net/fastkart-admin/assets/data',
-    configUrl:"https://covekart-api.onrender.com/"
+  production: true,
+  baseURL: 'https://angular.pixelstrap.net/fastkart',
+  URL: 'https://angular.pixelstrap.net/fastkart/assets/data',
+  configUrl :'https://covekart-api.onrender.com/'
+
 };
   
 /*
