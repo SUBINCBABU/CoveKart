@@ -1,0 +1,30 @@
+<section class="section-b-space shop-section" id="filtered_products">
+    <div class="container-fluid-lg">
+        <div class="row">
+            <div class="col-xxl-3 col-lg-4">
+                <div class="left-box">
+                    <app-collection-sidebar [filter]="filter">
+                        <div class="vendor-detail-box">
+                            <div class="vendor-name vendor-bottom">
+                                <div class="vendor-logo">
+                                    <app-seller-store-logo [store]="store"></app-seller-store-logo>
+                                    <div>
+                                        <app-seller-store-name [store]="store"></app-seller-store-name>
+                                        <div class="product-rating vendor-rating">
+                                            <app-seller-store-rating [store]="store"></app-seller-store-rating>
+                                        </div>
+                                    </div>
+                                </div>
+                                <app-seller-store-description [store]="store"></app-seller-store-description>
+                            </div>
+                            <app-seller-store-social-links [store]="store"></app-seller-store-social-links>
+                        </div>
+                    </app-collection-sidebar>
+                </div>
+            </div>
+            <div class="col-xxl-9 col-lg-8">
+                <app-collection-products [filter]="filter"></app-collection-products>
+            </div>
+        </div>
+    </div>
+</section>

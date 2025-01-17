@@ -1,0 +1,25 @@
+<form class="form-inline search-full" [class.open]="navServices.search" #dropdownContainer (clickOutside)="clickOutside()">
+  <div class="form-group w-100" #toggleButton>
+    <input class="demo-input Typeahead-input form-control-plaintext w-100" [(ngModel)]="text"
+      [ngModelOptions]="{ standalone: true }" (keyup)="searchTerm(text)" (click)="openDropDown(text)" type="text"
+      autocomplete="off" placeholder="{{ 'search_fastkart' | translate }} ..">
+    <i class="ri-close-line close-icon" (click)="closeSearch()"></i>
+  </div>
+  <div class="onhover-dropdown" [class.open]="searchResult">
+    <ul>
+        <ng-container *ngFor="let menu of menuItems">
+          <li>
+            <a class="main-content" [routerLink]="menu?.path">
+              <i class="{{ menu.icon }}" *ngIf="menu.icon"></i>
+              {{ menu.title.replace(' ', '_') | translate }}
+            </a>
+          </li>
+        </ng-container>
+    </ul>
+    <div class="Typeahead-menu" [class.open]="searchResultEmpty" *ngIf="searchResultEmpty">
+      <div class="tt-dataset tt-dataset-0">
+        <div class="EmptyMessage">{{ 'opps!!_There_are_no_result_found' | translate }}</div>
+      </div>
+    </div>
+  </div>
+</form>

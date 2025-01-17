@@ -1,0 +1,55 @@
+<div [formGroup]="linkForm">
+    <app-form-fields [label]="'select_link'" [for]="'type'">
+        <select2 class="custom-select" 
+            [data]="linkOption?.length ? linkOption : []"
+            [placeholder]="'select_link' | translate"
+            multiple="false"
+            formControlName="link_type"
+            (click)="selectImageLink()"
+            noResultMessage="{{'no_data_found' | translate }}"
+            resettable>
+        </select2>
+    </app-form-fields>
+ 
+    <app-form-fields [label]="'product'" [for]="'link'" *ngIf="linkForm?.value?.link_type === 'product'">
+        <select2 class="custom-select" 
+            [templates]="template" 
+            [data]="products?.length ? products : []"
+            [placeholder]="'select_product' | translate"
+            formControlName="link"
+            noResultMessage="{{'no_data_found' | translate }}"
+            [customSearchEnabled]="true"
+            (update)="selectProduct($event)"
+            (close)="productDropdown($event)"
+            (search)="searchProduct($event)"
+            multiple="false"
+            resettable>
+            <ng-template #template let-data="data">
+                <div class="image">
+                    <img [src]="data.image" [class]="'img-fluid selection-image'">
+                </div>
+                {{ data.name }}
+            </ng-template>
+        </select2>
+    </app-form-fields>
+    <app-form-fields [label]="'categories'" [for]="'type'" *ngIf="linkForm?.value?.link_type === 'collection'">
+        <select2 class="custom-select" 
+            [templates]="template" 
+            [data]="categories?.length ? categories : []"
+            [placeholder]="'select_categories' | translate"
+            formControlName="link"
+            multiple="false"
+            noResultMessage="{{'no_data_found' | translate }}"
+            resettable>
+            <ng-template #template let-data="data">
+                <div class="image">
+                    <img [src]="data.image" [class]="'img-fluid selection-image'">
+                </div>
+                {{ data.name }} 
+            </ng-template>
+        </select2>
+    </app-form-fields>
+    <app-form-fields [label]="'external_url'" [for]="'type'" *ngIf="linkForm?.value?.link_type === 'external_url'">
+        <input class="form-control" id="external_url" type="url" formControlName="link" placeholder="https://youdomain.com/">
+    </app-form-fields>
+</div>

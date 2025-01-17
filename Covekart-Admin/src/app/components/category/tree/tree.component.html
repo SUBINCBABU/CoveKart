@@ -1,0 +1,22 @@
+<div class="theme-tree-box">
+    <input class="form-control" placeholder="{{ 'search_category' | translate }}" [formControl]="treeSearch">
+    <ul class="tree-main-ul" *ngIf="dataToShow?.length">
+        <li class="cursor-pointer">
+            <div>
+                <i class="tree-icon folder-icon" role="presentation"></i>
+                <span>{{ 'categories' | translate }}</span>
+            </div>
+            <ul>
+                <app-tree-node [node]="node" [displayKey]="displayKey" [recursionKey]="recursionKey"
+                    [categoryType]="categoryType" *ngFor="let node of dataToShow">
+                </app-tree-node>
+            </ul>
+        </li>
+    </ul>
+</div>
+<app-no-data 
+    [class]="'no-data-added category-no-data'" 
+    [image]="'assets/svg/no-category.svg'"
+    [text]="'no_categories_found'" 
+    *ngIf="!dataToShow?.length">
+</app-no-data>

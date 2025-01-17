@@ -1,0 +1,846 @@
+<app-page-wrapper [gridClass]="'col-sm-12'" [title]="'theme_paris_settings'">
+   <form class="theme-form theme-form-2 mega-form" (ngSubmit)="submit()" [formGroup]="form">
+      <div class="vertical-tabs">
+         <div class="row">
+            <div class="col-xl-3 col-lg-4">
+               <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="vertical" formGroupName="content">
+                  <li ngbNavItem="home_banner">
+                     <a ngbNavLink><i class="ri-record-circle-line"></i>{{ 'home_banner' | translate }}</a>
+                     <ng-template ngbNavContent>
+                        <div formGroupName="home_banner">
+                           <div class="inside-horizontal-tabs">
+                              <ul ngbNav #nav="ngbNav" [(activeId)]="banner" class="nav-tabs">
+                                 <li [ngbNavItem]="1">
+                                    <a ngbNavLink>{{ 'main_banner' | translate }}</a>
+                                    <ng-template ngbNavContent>
+                                       <div formGroupName="main_banner">
+                                          <app-form-fields [label]="'image'" [for]="'image_url'">
+                                             <app-image-upload 
+                                                [url]="true"
+                                                [multipleImage]="false"
+                                                [helpText]="'*Upload image size 1155x670px recommended'"
+                                                [imageUrl]="form.get('content.home_banner.main_banner.image_url')?.value"
+                                                (selectedFiles)="selectImage($event, 'content.home_banner.main_banner.image_url')">
+                                             </app-image-upload>
+                                          </app-form-fields>
+                                          <app-link 
+                                             (productFilter)="getProducts($event)"
+                                             [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                             [linkForm]="form.get('content.home_banner.main_banner.redirect_link')">
+                                          </app-link>
+                                       </div>
+                                    </ng-template>
+                                 </li>
+                                 <li [ngbNavItem]="2">
+                                    <a ngbNavLink>{{ 'sub_banner' | translate }} 1</a>
+                                    <ng-template ngbNavContent>
+                                       <div formGroupName="sub_banner_1">
+                                          <app-form-fields [label]="'image'" [for]="'image_url'">
+                                             <app-image-upload 
+                                                [url]="true"
+                                                [multipleImage]="false"
+                                                [helpText]="'*Upload image size 415x320px recommended'"
+                                                [imageUrl]="form.get('content.home_banner.sub_banner_1.image_url')?.value"
+                                                (selectedFiles)="selectImage($event, 'content.home_banner.sub_banner_1.image_url')">
+                                             </app-image-upload>
+                                          </app-form-fields>
+                                          <app-link 
+                                             (productFilter)="getProducts($event)"
+                                             [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                             [linkForm]="form.get('content.home_banner.sub_banner_1.redirect_link')">
+                                          </app-link>
+                                       </div>
+                                    </ng-template>
+                                 </li>
+                                 <li [ngbNavItem]="3">
+                                    <a ngbNavLink>{{ 'sub_banner' | translate }} 2</a>
+                                    <ng-template ngbNavContent>
+                                       <div formGroupName="sub_banner_2">
+                                          <app-form-fields [label]="'image'" [for]="'image_url'">
+                                             <app-image-upload 
+                                                [url]="true"
+                                                [multipleImage]="false"
+                                                [helpText]="'*Upload image size 415x320px recommended'"
+                                                [imageUrl]="form.get('content.home_banner.sub_banner_2.image_url')?.value"
+                                                (selectedFiles)="selectImage($event, 'content.home_banner.sub_banner_2.image_url')">
+                                             </app-image-upload>
+                                          </app-form-fields>
+                                          <app-link 
+                                             (productFilter)="getProducts($event)"
+                                             [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                             [linkForm]="form.get('content.home_banner.sub_banner_2.redirect_link')">
+                                          </app-link>
+                                       </div>
+                                    </ng-template>
+                                 </li>
+                              </ul>
+                              <div [ngbNavOutlet]="nav" class="mt-3"></div>
+                           </div>
+                        </div>
+                     </ng-template>
+                  </li>
+                  <li ngbNavItem="featured_banners">
+                     <a ngbNavLink><i class="ri-record-circle-line"></i>{{ 'featured_banners' | translate }}</a>
+                     <ng-template ngbNavContent>
+                        <div formGroupName="featured_banners">
+                           <app-button [class]="'btn btn-animation mb-3'" [id]="'add_banners_btn'" (click)="addBanner($event)" [spinner]="false">
+                              {{ 'add_banners' | translate }}
+                           </app-button>
+                           <div class="shipping-accordion variant-accordion" *ngIf="bannersArray?.controls?.length">
+                              <div formArrayName='banners'>
+                                 <ng-container>
+                                    <div class="d-flex" *ngFor="let banners of bannersArray.controls; let i = index"
+                                       formGroupName="{{ i }}">
+                                       <div class="col-11">
+                                          <div ngbAccordion>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>{{ 'banner' | translate }} {{(i+1)}}</button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                            <app-image-upload
+                                                               [url]="true"
+                                                               [multipleImage]="false"
+                                                               [helpText]="'*Upload image size 376x231px recommended'"
+                                                               [imageUrl]="form.get('content.featured_banners.banners')?.value[i].image_url"
+                                                               (selectedFiles)="selectBannerArray($event, i )">
+                                                            </app-image-upload>
+                                                         </app-form-fields>
+                                                         <app-link 
+                                                            (productFilter)="getProducts($event)"
+                                                            [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                            [linkForm]="banners.get('redirect_link')">
+                                                         </app-link>
+                                                         <app-form-fields [label]="'status'" [for]="'status'+i">
+                                                            <div class="form-check form-switch ps-0">
+                                                               <label class="switch">
+                                                                  <input type="checkbox" id="status" formControlName="status">
+                                                                  <span class="switch-state"></span>
+                                                               </label>
+                                                            </div>
+                                                         </app-form-fields>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-1 text-center fs-20">
+                                          <a href="javascript:void(0)" (click)="remove(i)"
+                                             class="invalid-feedback text-end cursor-pointer d-inline-block w-auto mt-2">
+                                             <i class="ri-close-line"></i></a>
+                                       </div>
+                                    </div>
+                                 </ng-container>
+                              </div>
+                           </div>
+                        </div>
+                     </ng-template>
+                  </li>
+                  <li ngbNavItem="main_content">
+                     <a ngbNavLink><i class="ri-record-circle-line"></i>{{ 'main_content' | translate }}</a>
+                     <ng-template ngbNavContent>
+                        <div formGroupName="main_content">
+                           <div class="inside-horizontal-tabs">
+                              <ul ngbNav #nav="ngbNav" [(activeId)]="main_content" class="nav-tabs">
+                                 <li [ngbNavItem]="1">
+                                    <a ngbNavLink>{{ 'left_sidebar' | translate }}</a>
+                                    <ng-template ngbNavContent>
+                                       <div formGroupName="sidebar">
+                                          <app-form-fields [label]="'status'" [for]="'status'">
+                                             <div class="form-check form-switch ps-0">
+                                                <label class="switch">
+                                                   <input type="checkbox" id="status" formControlName="status">
+                                                   <span class="switch-state"></span>
+                                                </label>
+                                             </div>
+                                          </app-form-fields>
+                                          <div class="shipping-accordion variant-accordion">
+                                             <ng-container>
+                                                <div ngbAccordion>
+                                                   <div ngbAccordionItem [collapsed]="false">
+                                                      <div ngbAccordionHeader>
+                                                         <button ngbAccordionButton>
+                                                            {{
+                                                               form.get('content.main_content.sidebar.categories_icon_list.title').value ? 
+                                                               form.get('content.main_content.sidebar.categories_icon_list.title').value : 'Enter Title'
+                                                            }}
+                                                         </button>
+                                                      </div>
+                                                      <div ngbAccordionCollapse>
+                                                         <div ngbAccordionBody>
+                                                            <ng-template>
+                                                               <div formGroupName="categories_icon_list">
+                                                                  <app-form-fields [label]="'title'" [for]="'title'">
+                                                                     <input class="form-control" id="title" type="text"
+                                                                        placeholder="{{ 'enter_title' | translate }}" formControlName="title">
+                                                                  </app-form-fields>
+                                                                     <app-form-fields [label]="'categories'" [for]="'type'">
+                                                                        <select2 class="custom-select" 
+                                                                           [templates]="template" 
+                                                                           [data]="(categories$ | async) ? (categories$ | async) : []"
+                                                                           [placeholder]="'select_categories' | translate "
+                                                                           formControlName="category_ids" multiple="true"
+                                                                           noResultMessage="{{'no_data_found' | translate }}"
+                                                                           resettable>
+                                                                           <ng-template #template let-data="data">
+                                                                              <div class="image">
+                                                                                 <img [src]="data.image" [class]="'img-fluid selection-image'">
+                                                                              </div>
+                                                                              {{ data.name }}
+                                                                           </ng-template>
+                                                                        </select2>
+                                                                     </app-form-fields>
+                                                                  <app-form-fields [label]="'status'" [for]="'status'">
+                                                                     <div class="form-check form-switch ps-0">
+                                                                        <label class="switch">
+                                                                           <input type="checkbox" id="status"
+                                                                              formControlName="status">
+                                                                           <span class="switch-state"></span>
+                                                                        </label>
+                                                                     </div>
+                                                                  </app-form-fields>
+                                                               </div>
+                                                            </ng-template>
+                                                         </div>
+                                                      </div>
+                                                   </div>
+                                                   <div ngbAccordionItem [collapsed]="false">
+                                                      <div ngbAccordionHeader>
+                                                         <button ngbAccordionButton>
+                                                            {{ 'banners' | translate }}
+                                                         </button>
+                                                      </div>
+                                                      <div ngbAccordionCollapse>
+                                                         <div ngbAccordionBody>
+                                                            <ng-template>
+                                                               <div formGroupName="left_side_banners">
+                                                                  <div formGroupName="banner_1">
+                                                                     <h4 class="fw-semibold mb-3 txt-primary w-100">{{ 'banner' | translate }} 1
+                                                                     </h4>
+                                                                     <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                                        <app-image-upload 
+                                                                           [url]="true"
+                                                                           [multipleImage]="false"
+                                                                           [helpText]="'*Upload image size 375x586px recommended'"
+                                                                           [imageUrl]="form.get('content.main_content.sidebar.left_side_banners.banner_1.image_url')?.value"
+                                                                           (selectedFiles)="selectImage($event, 'content.main_content.sidebar.left_side_banners.banner_1.image_url')">
+                                                                        </app-image-upload>
+                                                                     </app-form-fields>
+                                                                     <app-link 
+                                                                        (productFilter)="getProducts($event)"
+                                                                        [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                        [linkForm]="form.get('content.main_content.sidebar.left_side_banners.banner_1.redirect_link')">
+                                                                     </app-link>
+                                                                  </div>
+                                                                  <div formGroupName="banner_2">
+                                                                     <h4 class="fw-semibold mb-3 txt-primary w-100">{{ 'banner' | translate }} 2 </h4>
+                                                                     <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                                        <app-image-upload 
+                                                                           [url]="true"
+                                                                           [multipleImage]="false"
+                                                                           [helpText]="'*Upload image size 375x980px recommended'"
+                                                                           [imageUrl]="form.get('content.main_content.sidebar.left_side_banners.banner_2.image_url')?.value"
+                                                                           (selectedFiles)="selectImage($event, 'content.main_content.sidebar.left_side_banners.banner_2.image_url')">
+                                                                        </app-image-upload>
+                                                                     </app-form-fields>
+                                                                     <app-link 
+                                                                        (productFilter)="getProducts($event)"
+                                                                        [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                        [linkForm]="form.get('content.main_content.sidebar.left_side_banners.banner_2.redirect_link')">
+                                                                     </app-link>
+                                                                  </div>
+                                                                  <app-form-fields [label]="'status'" [for]="'status'">
+                                                                     <div class="form-check form-switch ps-0">
+                                                                        <label class="switch">
+                                                                           <input type="checkbox" id="status"
+                                                                              formControlName="status">
+                                                                           <span class="switch-state"></span>
+                                                                        </label>
+                                                                     </div>
+                                                                  </app-form-fields>
+                                                               </div>
+                                                            </ng-template>
+                                                         </div>
+                                                      </div>
+                                                   </div>
+                                                   <div ngbAccordionItem [collapsed]="false">
+                                                      <div ngbAccordionHeader>
+                                                         <button ngbAccordionButton>
+                                                            {{
+                                                               form.get('content.main_content.sidebar.sidebar_products.title').value ?
+                                                               form.get('content.main_content.sidebar.sidebar_products.title').value : 'Enter Title'
+                                                            }}
+                                                         </button>
+                                                      </div>
+                                                      <div ngbAccordionCollapse>
+                                                         <div ngbAccordionBody>
+                                                            <ng-template>
+                                                               <div formGroupName="sidebar_products">
+                                                                  <app-form-fields [label]="'title'" [for]="'title'">
+                                                                     <input class="form-control" id="title" type="text"
+                                                                        placeholder="{{ 'enter_title' | translate }}" formControlName="title">
+                                                                  </app-form-fields>
+                                                                  <app-form-fields [label]="'product'" [for]="'product_ids'">
+                                                                     <select2 class="custom-select" 
+                                                                        [templates]="template" 
+                                                                        [data]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                        [placeholder]="'select_product' | translate "
+                                                                        formControlName="product_ids" multiple="true"
+                                                                        noResultMessage="{{'no_data_found' | translate }}"
+                                                                        [customSearchEnabled]="true"
+                                                                        (close)="productDropdown($event)"
+                                                                        (search)="searchProduct($event)"
+                                                                        resettable>
+                                                                        <ng-template #template let-data="data">
+                                                                           <div class="image">
+                                                                              <img [src]="data.image" [class]="'img-fluid selection-image'">
+                                                                           </div>
+                                                                           {{ data.name }}
+                                                                        </ng-template>
+                                                                     </select2>
+                                                                  </app-form-fields>
+                                                                  <app-form-fields [label]="'status'" [for]="'status'">
+                                                                     <div class="form-check form-switch ps-0">
+                                                                        <label class="switch">
+                                                                           <input type="checkbox" id="status"
+                                                                              formControlName="status">
+                                                                           <span class="switch-state"></span>
+                                                                        </label>
+                                                                     </div>
+                                                                  </app-form-fields>
+                                                               </div>
+                                                            </ng-template>
+                                                         </div>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                             </ng-container>
+                                          </div>
+                                       </div>
+                                    </ng-template>
+                                 </li>
+                                 <li [ngbNavItem]="2">
+                                    <a ngbNavLink>{{ 'right_content' | translate }}</a>
+                                    <ng-template ngbNavContent>
+                                       <div class="shipping-accordion variant-accordion">
+                                          <ng-container>
+                                          <div ngbAccordion>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{ 
+                                                         form.get('content.main_content.section1_products.title').value ?
+                                                         form.get('content.main_content.section1_products.title').value : 'Enter Title'
+                                                      }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section1_products">
+                                                            <app-form-fields [label]="'title'" [for]="'title'">
+                                                               <input class="form-control" id="title" type="text"
+                                                                  placeholder="{{ 'enter_title' | translate }}" formControlName="title">
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'description'" [for]="'description'">
+                                                               <textarea class="form-control" id="description"
+                                                                  placeholder="{{ 'enter_description' | translate }}"
+                                                                  formControlName="description"></textarea>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'product'" [for]="'product_ids'">
+                                                               <select2 class="custom-select" 
+                                                                     [templates]="template" 
+                                                                     [data]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                     [placeholder]="'select_product' | translate "
+                                                                     formControlName="product_ids" multiple="true"
+                                                                     noResultMessage="{{'no_data_found' | translate }}"
+                                                                     [customSearchEnabled]="true"
+                                                                     (close)="productDropdown($event)"
+                                                                     (search)="searchProduct($event)"
+                                                                     resettable>
+                                                                  <ng-template #template let-data="data">
+                                                                     <div class="image">
+                                                                        <img [src]="data.image" [class]="'img-fluid selection-image'">
+                                                                     </div>
+                                                                     {{ data.name }}
+                                                                  </ng-template>
+                                                               </select2>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{
+                                                         form.get('content.main_content.section2_categories_list.title').value ?
+                                                         form.get('content.main_content.section2_categories_list.title').value : 'Enter Title'
+                                                      }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section2_categories_list">
+                                                            <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                               <app-image-upload 
+                                                                  [url]="true"
+                                                                  [multipleImage]="false"
+                                                                  [helpText]="'*Upload image size 155x155px recommended'"
+                                                                  [imageUrl]="form.get('content.main_content.section2_categories_list.image_url')?.value"
+                                                                  (selectedFiles)="selectImage($event, 'content.main_content.section2_categories_list.image_url')">
+                                                               </app-image-upload>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'title'" [for]="'title'">
+                                                               <input class="form-control" id="title" type="text"
+                                                                  placeholder="{{ 'enter_title' | translate }}" formControlName="title">
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'description'" [for]="'description'">
+                                                               <textarea class="form-control" id="description"
+                                                                  placeholder="{{ 'enter_description' | translate }}"
+                                                                  formControlName="description"></textarea>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'categories'" [for]="'type'">
+                                                               <select2 class="custom-select" 
+                                                                  [templates]="template" 
+                                                                  [data]="(categories$ | async) ? (categories$ | async) : []"
+                                                                  [placeholder]="'select_categories' | translate "
+                                                                  formControlName="category_ids" multiple="true"
+                                                                  noResultMessage="{{'no_data_found' | translate }}"
+                                                                  resettable>
+                                                                  <ng-template #template let-data="data">
+                                                                     <div class="image">
+                                                                        <img [src]="data.image" [class]="'img-fluid selection-image'">
+                                                                     </div>
+                                                                     {{ data.name }}
+                                                                  </ng-template>
+                                                               </select2>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{ 'banners' | translate }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section3_two_column_banners">
+                                                            <div formGroupName="banner_1">
+                                                               <h4 class="fw-semibold mb-3 txt-primary w-100">{{ 'banner' | translate }} 1</h4>
+                                                               <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                                  <app-image-upload 
+                                                                     [url]="true"
+                                                                     [multipleImage]="false"
+                                                                     [helpText]="'*Upload image size 583x157px recommended'"
+                                                                     [imageUrl]="form.get('content.main_content.section3_two_column_banners.banner_1.image_url')?.value"
+                                                                     (selectedFiles)="selectImage($event, 'content.main_content.section3_two_column_banners.banner_1.image_url')">
+                                                                  </app-image-upload>
+                                                               </app-form-fields>
+                                                               <app-link 
+                                                                  (productFilter)="getProducts($event)"
+                                                                  [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                  [linkForm]="form.get('content.main_content.section3_two_column_banners.banner_1.redirect_link')">
+                                                               </app-link>
+                                                            </div>
+                                                            <div formGroupName="banner_2">
+                                                               <h4 class="fw-semibold mb-3 txt-primary w-100">{{ 'banner' | translate }} 2</h4>
+                                                               <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                                  <app-image-upload 
+                                                                     [url]="true"
+                                                                     [multipleImage]="false"
+                                                                     [helpText]="'*Upload image size 583x157px recommended'"
+                                                                     [imageUrl]="form.get('content.main_content.section3_two_column_banners.banner_2.image_url')?.value"
+                                                                     (selectedFiles)="selectImage($event, 'content.main_content.section3_two_column_banners.banner_2.image_url')">
+                                                                  </app-image-upload>
+                                                               </app-form-fields>
+                                                               <app-link 
+                                                                  (productFilter)="getProducts($event)"
+                                                                  [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                  [linkForm]="form.get('content.main_content.section3_two_column_banners.banner_2.redirect_link')">
+                                                               </app-link>
+                                                            </div>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status" formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{ 
+                                                         form.get('content.main_content.section4_products.title').value ?
+                                                         form.get('content.main_content.section4_products.title').value : 'Enter Title'
+                                                      }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section4_products">
+                                                            <app-form-fields [label]="'title'" [for]="'sub_title'">
+                                                               <input class="form-control" id="title" type="text"
+                                                                  placeholder="{{ 'enter_title' | translate }}" formControlName="title">
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'description'" [for]="'description'">
+                                                               <textarea class="form-control" id="description"
+                                                                  placeholder="{{ 'enter_description' | translate }}"
+                                                                  formControlName="description"></textarea>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'product'" [for]="'product_ids'">
+                                                               <select2 class="custom-select" 
+                                                                     [templates]="template" 
+                                                                     [data]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                     [placeholder]="'select_product' | translate "
+                                                                     formControlName="product_ids" multiple="true"
+                                                                     noResultMessage="{{'no_data_found' | translate }}"
+                                                                     [customSearchEnabled]="true"
+                                                                     (close)="productDropdown($event)"
+                                                                     (search)="searchProduct($event)"
+                                                                     resettable>
+                                                                  <ng-template #template let-data="data">
+                                                                     <div class="image">
+                                                                        <img [src]="data.image" [class]="'img-fluid selection-image'">
+                                                                     </div>
+                                                                     {{ data.name }}
+                                                                  </ng-template>
+                                                               </select2>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{ 'coupons' | translate }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section5_coupons">
+                                                            <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                               <app-image-upload 
+                                                                  [url]="true"
+                                                                  [multipleImage]="false"
+                                                                  [helpText]="'*Upload image size 1198x138px recommended'"
+                                                                  [imageUrl]="form.get('content.main_content.section5_coupons.image_url')?.value"
+                                                                  (selectedFiles)="selectImage($event, 'content.main_content.section5_coupons.image_url')">
+                                                               </app-image-upload>
+                                                            </app-form-fields>
+                                                            <app-link 
+                                                               (productFilter)="getProducts($event)"
+                                                               [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                               [linkForm]="form.get('content.main_content.section5_coupons.redirect_link')">
+                                                            </app-link>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{ 'banners' | translate }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section6_two_column_banners">
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                            <div formGroupName="banner_1">
+                                                               <h4 class="fw-semibold mb-3 txt-primary w-100">{{ 'banner' | translate }} 1</h4>
+                                                               <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                                  <app-image-upload 
+                                                                     [url]="true"
+                                                                     [multipleImage]="false"
+                                                                     [helpText]="'*Upload image size 790x286px recommended'"
+                                                                     [imageUrl]="form.get('content.main_content.section6_two_column_banners.banner_1.image_url')?.value"
+                                                                     (selectedFiles)="selectImage($event, 'content.main_content.section6_two_column_banners.banner_1.image_url')">
+                                                                  </app-image-upload>
+                                                               </app-form-fields>
+                                                               <app-link 
+                                                                  (productFilter)="getProducts($event)"
+                                                                  [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                  [linkForm]="form.get('content.main_content.section6_two_column_banners.banner_1.redirect_link')">
+                                                               </app-link>
+                                                            </div>
+                                                            <div formGroupName="banner_2">
+                                                               <h4 class="fw-semibold mb-3 txt-primary w-100">{{ 'banner' | translate }} 2</h4>
+                                                               <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                                  <app-image-upload 
+                                                                     [url]="true"
+                                                                     [multipleImage]="false"
+                                                                     [helpText]="'*Upload image size 383x286px recommended'"
+                                                                     [imageUrl]="form.get('content.main_content.section6_two_column_banners.banner_2.image_url')?.value"
+                                                                     (selectedFiles)="selectImage($event, 'content.main_content.section6_two_column_banners.banner_2.image_url')">
+                                                                  </app-image-upload>
+                                                               </app-form-fields>
+                                                               <app-link 
+                                                                  (productFilter)="getProducts($event)"
+                                                                  [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                  [linkForm]="form.get('content.main_content.section6_two_column_banners.banner_2.redirect_link')">
+                                                               </app-link>
+                                                            </div>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{
+                                                          form.get('content.main_content.section7_products.title').value ?
+                                                          form.get('content.main_content.section7_products.title').value : 'Enter Title'
+                                                      }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section7_products">
+                                                            <app-form-fields [label]="'title'" [for]="'title'">
+                                                               <input class="form-control" id="title" type="text" placeholder="{{ 'enter_title' | translate }}" formControlName="title">
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'description'" [for]="'description'">
+                                                               <textarea class="form-control" id="description"
+                                                                  placeholder="{{ 'enter_description' | translate }}"
+                                                                  formControlName="description"></textarea>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'product'" [for]="'product_ids'">
+                                                               <select2 class="custom-select" 
+                                                                     [templates]="template" 
+                                                                     [data]="(product$ | async)?.length ? (product$ | async) : []"
+                                                                     [placeholder]="'select_product' | translate "
+                                                                     formControlName="product_ids" multiple="true"
+                                                                     noResultMessage="{{'no_data_found' | translate }}"
+                                                                     [customSearchEnabled]="true"
+                                                                     (close)="productDropdown($event)"
+                                                                     (search)="searchProduct($event)"
+                                                                     resettable>
+                                                                  <ng-template #template let-data="data">
+                                                                     <div class="image">
+                                                                        <img [src]="data.image" [class]="'img-fluid selection-image'">
+                                                                     </div>
+                                                                     {{ data.name }}
+                                                                  </ng-template>
+                                                               </select2>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{ 'banner' | translate }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                       <ng-template>
+                                                         <div formGroupName="section8_full_width_banner">
+                                                            <app-form-fields [label]="'image'" [for]="'image_url'">
+                                                               <app-image-upload 
+                                                                  [url]="true"
+                                                                  [multipleImage]="false"
+                                                                  [helpText]="'*Upload image size 1189x297px recommended'"
+                                                                  [imageUrl]="form.get('content.main_content.section8_full_width_banner.image_url')?.value"
+                                                                  (selectedFiles)="selectImage($event, 'content.main_content.section8_full_width_banner.image_url')">
+                                                               </app-image-upload>
+                                                            </app-form-fields>
+                                                            <app-link 
+                                                               (productFilter)="getProducts($event)"
+                                                               [products]="(product$ | async)?.length ? (product$ | async) : []"
+                                                               [linkForm]="form.get('content.main_content.section8_full_width_banner.redirect_link')">
+                                                            </app-link>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <div ngbAccordionItem [collapsed]="false">
+                                                <div ngbAccordionHeader>
+                                                   <button ngbAccordionButton>
+                                                      {{
+                                                         form.get('content.main_content.section9_featured_blogs.title').value ?
+                                                         form.get('content.main_content.section9_featured_blogs.title').value : 'Enter Title'
+                                                      }}
+                                                   </button>
+                                                </div>
+                                                <div ngbAccordionCollapse>
+                                                   <div ngbAccordionBody>
+                                                      <ng-template>
+                                                         <div formGroupName="section9_featured_blogs">
+                                                            <app-form-fields [label]="'title'" [for]="'title'">
+                                                               <input class="form-control" id="title" type="text"
+                                                                  placeholder="{{ 'enter_title' | translate }}" formControlName="title">
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'description'" [for]="'description'">
+                                                               <textarea class="form-control" id="description"
+                                                                  placeholder="{{ 'enter_description' | translate }}"
+                                                                  formControlName="description"></textarea>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'blogs'" [for]="'type'">
+                                                               <select2 class="custom-select"
+                                                                  [data]="(blogs$ | async) ? (blogs$ | async) : []"
+                                                                  [placeholder]="'select_blogs' | translate " formControlName="blog_ids"
+                                                                  noResultMessage="{{'no_data_found' | translate }}"
+                                                                  multiple="true">
+                                                               </select2>
+                                                            </app-form-fields>
+                                                            <app-form-fields [label]="'status'" [for]="'status'">
+                                                               <div class="form-check form-switch ps-0">
+                                                                  <label class="switch">
+                                                                     <input type="checkbox" id="status"
+                                                                        formControlName="status">
+                                                                     <span class="switch-state"></span>
+                                                                  </label>
+                                                               </div>
+                                                            </app-form-fields>
+                                                         </div>
+                                                      </ng-template>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                          </div>
+                                          </ng-container>
+                                       </div>
+                                    </ng-template>
+                                 </li>
+                              </ul>
+                              <div [ngbNavOutlet]="nav" class="mt-3"></div>
+                           </div>
+                        </div>
+                     </ng-template>
+                  </li>
+                  <li ngbNavItem="news_letter">
+                     <a ngbNavLink><i class="ri-record-circle-line"></i>{{ 'news_letter' | translate }}</a>
+                     <ng-template ngbNavContent>
+                        <div formGroupName="news_letter">
+                           <app-form-fields [label]="'title'" [for]="'title'">
+                              <input class="form-control" id="title" type="text" placeholder="{{ 'enter_title' | translate }}"
+                                 formControlName="title">
+                           </app-form-fields>
+                           <app-form-fields [label]="'sub_title'" [for]="'title'">
+                              <input class="form-control" id="sub_title" type="text" placeholder="{{ 'enter_sub_title' | translate }}"
+                                 formControlName="sub_title">
+                           </app-form-fields>
+                           <app-form-fields [label]="'image'" [for]="'image_url'">
+                              <app-image-upload 
+                                 [url]="true"
+                                 [multipleImage]="false"
+                                 [helpText]="'*Upload image size 1600x218px recommended'"
+                                 [imageUrl]="form.get('content.news_letter.image_url')?.value"
+                                 (selectedFiles)="selectImage($event, 'content.news_letter.image_url')">
+                              </app-image-upload>
+                           </app-form-fields>
+                           <app-form-fields [label]="'status'" [for]="'status'">
+                              <div class="form-check form-switch ps-0">
+                                 <label class="switch">
+                                    <input type="checkbox" id="status" formControlName="status">
+                                    <span class="switch-state"></span>
+                                 </label>
+                              </div>
+                           </app-form-fields>
+                        </div>
+                     </ng-template>
+                  </li>
+               </ul>
+            </div>
+            <div class="col-xl-7 col-lg-8">
+               <div [ngbNavOutlet]="nav"></div>
+            </div>
+         </div>
+         <app-button [id]="'theme_1_submit'" *hasPermission="'theme.edit'">
+            {{ 'submit' | translate }}
+         </app-button>
+      </div>
+   </form>
+</app-page-wrapper>

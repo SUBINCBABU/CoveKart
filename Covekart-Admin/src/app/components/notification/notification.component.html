@@ -1,0 +1,8 @@
+<app-page-wrapper [gridClass]="'col-xxl-8 m-auto'" [title]="'notifications'">
+    <ul class="notification-setting" *ngIf="(notification$ | async)?.length">
+        <li [class.unread]="!notification.read_at" *ngFor="let notification of (notification$ | async)">
+            <h4>{{ notification?.data?.message }}</h4>
+            <h5><i class="ri-time-line"></i> {{ notification?.created_at | date: 'dd MMM yyyy hh:mm:a' }}</h5>
+        </li>
+    </ul>
+</app-page-wrapper>

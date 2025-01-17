@@ -1,0 +1,9 @@
+<div class="container-fluid-lg" *ngIf="relatedproducts?.length">
+    <app-title [title]="'You May Also Like'"></app-title>
+    <div class="row g-sm-3 g-2">
+        <div class="col-xxl-2 col-lg-3 col-md-4 col-6 product-box-contain" 
+            *ngFor="let product of relatedproducts">
+            <app-product-box [product]="product" [class]="'product-box-3'" [style]="'horizontal'"></app-product-box>
+        </div>
+    </div>
+</div>

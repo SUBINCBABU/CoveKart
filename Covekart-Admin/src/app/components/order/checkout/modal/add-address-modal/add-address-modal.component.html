@@ -1,0 +1,96 @@
+<ng-template #addAddressModal let-modal>
+    <div class="modal-header">
+        <h3 class="fw-semibold">{{ 'add' | translate }} {{ form.controls['type']?.value | titlecase }} {{'address' | translate }}</h3>
+        <app-button [class]="'btn btn-close'" [spinner]="false" [id]="'address_modal_close_btn'" (click)="modal.dismiss('Cross click')">
+            <i class="ri-close-line"></i>
+        </app-button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="form" class="theme-form theme-form-2" (ngSubmit)="submit(id)">
+            <app-form-fields [label]="'title'" [for]="'title'" [required]="true">
+                <input class="form-control" id="title" type="text" placeholder="{{ 'enter_name' | translate }}" formControlName="title" />
+                <div class="invalid-feedback" *ngIf="form?.controls['title']?.touched && form.controls['title']?.errors?.['required']">
+                    {{ 'title_is_required' | translate }}
+                </div>
+            </app-form-fields>
+            <app-form-fields [label]="'address'" [for]="'address'" [required]="true">
+                <input class="form-control" id="address" type="text" placeholder="{{ 'enter_address' | translate }}" formControlName="street" />
+                <div class="invalid-feedback" *ngIf="form?.controls['street']?.touched && form.controls['street']?.errors?.['required']">
+                    {{ 'street_is_required' | translate }}
+                </div>
+            </app-form-fields>
+            <app-form-fields [label]="'country'" [for]="'country_id'" [required]="true">
+                <select2 
+                    class="custom-select" 
+                    [data]="(countries$ | async)?.length ? (countries$ | async) : []"
+                    [placeholder]="'select_country' | translate" 
+                    formControlName="country_id" (update)="countryChange($event)"
+                    resettable>
+                </select2>
+                <div class="invalid-feedback" *ngIf="form?.controls['country_id']?.touched && form?.controls['country_id']?.errors?.['required']">
+                    {{ 'country_is_required' | translate }}
+                </div>
+            </app-form-fields>
+            <app-form-fields [label]="'state'" [for]="'state_id'" [required]="true">
+                <select2 class="custom-select" 
+                    [data]="(states$ | async)?.length ? (states$ | async) : []"
+                    [placeholder]="'select_state' | translate" 
+                    formControlName="state_id" resettable>
+                </select2>
+                <div class="invalid-feedback" *ngIf="form?.controls['state_id'].touched && form?.controls['state_id'].errors?.['required']">
+                    {{ 'state_is_required' | translate }}
+                </div>
+            </app-form-fields>
+            <app-form-fields [label]="'city'" [for]="'city'" [required]="true">
+                <input class="form-control" id="city" type="text" placeholder="{{'enter_city' | translate }}" formControlName="city" />
+                <div class="invalid-feedback" *ngIf="form?.controls['city']?.touched && form.controls['city']?.errors?.['required']">
+                    {{ 'city_is_required' | translate }}
+                </div>
+            </app-form-fields>
+            <app-form-fields [label]="'pincode'" [for]="'pincode'" [required]="true">
+                <input class="form-control" id="pincode" type="text" placeholder="{{ 'enter_pincode' | translate }}" formControlName="pincode" numbersOnly />
+                <div class="invalid-feedback" *ngIf="form?.controls['pincode']?.touched && form.controls['pincode']?.errors?.['required']">
+                    {{ 'pincode_is_required' | translate }}
+                </div>
+            </app-form-fields>
+            <app-form-fields [label]="'phone'" [for]="'phone'" [required]="true">
+                <select2 
+                    class="custom-select intl-tel-input" 
+                    [templates]="template" 
+                    [data]="codes"
+                    formControlName="country_code">
+                    <ng-template #template let-data="data">
+                        <div class="country">
+                            <div class="flag-box">
+                                <div class="iti-flag {{data?.class}}"></div>
+                            </div>
+                            <span class="dial-code">{{data.code}}</span>
+                        </div>
+                    </ng-template>
+                </select2>
+                <input type="number" class="form-control intl-input-padding" formControlName="phone" placeholder="{{ 'enter_phone' | translate }}" name="phone">
+                <div class="invalid-feedback" *ngIf="form.controls['phone'].touched && form.controls['phone'].errors?.['required']">
+                    {{ 'phone_number_is_required' | translate }}
+                </div>
+                <div class="invalid-feedback" *ngIf="form.controls['phone'].touched && form.controls['phone'].errors?.['pattern']">
+                    {{ 'phone_number_is_invalid' | translate }}
+                </div>
+            </app-form-fields>
+            <div class="button-box">
+                <app-button 
+                    [class]="'btn-md fw-bold btn btn-secondary'" 
+                    [type]="'button'"
+                    [spinner]="false" 
+                    [id]="'cancel_address_btn'" 
+                    (click)="modal.dismiss('Cancel')">
+                    {{ 'Cancel' | translate }}
+                </app-button>
+                <app-button 
+                    [class]="'btn-theme btn-md fw-bold btn'" 
+                    [id]="'submit_address_btn'">
+                    {{ 'Submit' | translate }}
+                </app-button>
+            </div>
+        </form>
+    </div>
+</ng-template>

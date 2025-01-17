@@ -1,0 +1,90 @@
+<!-- My Account Basic Style -->
+<!-- <div *ngIf="style == 'basic'">
+    <div class="delivery-login-box">
+        <div class="delivery-icon">
+            <i class="ri-user-line" *ngIf="!(isAuthenticated$ | async) else profile"></i>
+            <ng-template #profile>
+                <div class="user-box">
+                    <img [src]="(user$ | async)?.profile_image?.original_url" class="img-fluid" alt="profile"
+                        *ngIf="(user$ | async)?.profile_image && (user$ | async)?.profile_image?.original_url else placeholder">
+                    <ng-template #placeholder>
+                        <h3>{{ (user$ | async)?.name?.charAt(0)?.toString()?.toUpperCase() }}</h3>
+                    </ng-template>
+                </div>
+            </ng-template>
+        </div>
+        <div class="delivery-detail">
+            <h6>{{ 'hi' | translate }}, {{ ((isAuthenticated$ | async) ? (user$ | async)?.name : 'user' | translate) }}</h6>
+            <h5>{{ 'my_account' | translate }}</h5>
+        </div>
+    </div>
+    <div class="onhover-div onhover-div-login">
+        <ul class="user-box-name">
+            <li class="product-box-contain" *ngIf="!(isAuthenticated$ | async)">
+                <a [routerLink]="['/auth/login']">{{ 'log_in' | translate }}</a>
+            </li>
+            <li class="product-box-contain" *ngIf="!(isAuthenticated$ | async)">
+                <a [routerLink]="['/auth/register']">{{ 'register' | translate }}</a>
+            </li>
+            <li class="product-box-contain" *ngIf="(isAuthenticated$ | async)">
+                <a [routerLink]="['/account/dashboard']"><i class="ri-user-line me-2"></i> {{ 'my_account' | translate }}</a>
+            </li>
+            <li class="product-box-contain" *ngIf="(isAuthenticated$ | async)">
+                <a href="javascript:void(0)" (click)="confirmationModal.openModal()"><i class="ri-logout-box-r-line me-2"></i> {{ 'log_out' | translate }}</a>
+            </li>
+        </ul>
+    </div>
+</div> -->
+<!-- My Account Classic Style -->
+<div class="onhover-dropdown">
+    <a href="javascript:void(0)" class="user-box" *ngIf="style == 'classic'">
+        <span class="header-icon">
+
+            <i class="ri-user-line"></i>
+        </span>
+        <div class="user-name">
+
+            <h6 class="text-content">My Account</h6>
+            <h4 class="mt-1">{{ (isAuthenticated$ | async) ? (user$ | async)?.name : 'User' }}</h4>
+        </div>
+
+
+    </a>
+    <a href="javascript:void(0)" class="header-icon user-icon search-icon" *ngIf="style == 'standard'">
+        <!-- <i class="ri-user-line"></i> -->
+        <div class="delivery-icon">
+            <i class="ri-user-line" *ngIf="!(isAuthenticated$ | async) else profile"></i>
+            <ng-template #profile>
+                <div class="user-box">
+                    <img [src]="(user$ | async)?.profile_image?.original_url" class="img-fluid" alt="profile"
+                        *ngIf="(user$ | async)?.profile_image && (user$ | async)?.profile_image?.original_url else placeholder">
+                    <ng-template #placeholder>
+                        <h3>{{ (user$ | async)?.name?.charAt(0)?.toString()?.toUpperCase() }}</h3>
+                    </ng-template>
+                </div>
+            </ng-template>
+        </div>
+    </a>
+
+    <div class="onhover-div onhover-div-login">
+        <ul class="user-box-name">
+            <li class="product-box-contain" *ngIf="!(isAuthenticated$ | async)">
+                <a [routerLink]="['/auth/login']">Log In</a>
+            </li>
+            <li class="product-box-contain" *ngIf="!(isAuthenticated$ | async)">
+                <a [routerLink]="['/auth/register']">Register</a>
+            </li>
+            <li class="product-box-contain" *ngIf="(isAuthenticated$ | async)">
+                <a [routerLink]="['/account/dashboard']"><i class="ri-user-line me-2"></i> {{ 'my_account' | translate
+                    }}</a>
+            </li>
+            <li class="product-box-contain" *ngIf="(isAuthenticated$ | async)">
+                <a href="javascript:void(0)" (click)="confirmationModal.openModal()"><i
+                        class="ri-logout-box-r-line me-2"></i> {{ 'logout' | translate }}</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<app-confirmation-modal #confirmationModal (confirmed)="logout()">
+</app-confirmation-modal>

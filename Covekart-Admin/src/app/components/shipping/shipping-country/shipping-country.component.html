@@ -1,0 +1,26 @@
+<app-page-wrapper [gridClass]="'col-xxl-8 m-auto'" [title]="(shipping$ | async)?.country?.name">
+    <div class="btn-option" button>
+        <a [routerLink]="['/shipping']" class="btn btn-outline px-3"><i class="ri-arrow-left-line"></i> {{ 'back' | translate }}</a>
+        <a (click)="CreateShippingRuleModal.openModal()" class="align-items-center btn btn-theme d-flex">
+            <i class="ri-add-line"></i> {{ 'add_shipping_rule' | translate }}
+        </a>
+    </div>
+    <div class="shipping-accordion">
+        <div ngbAccordion>
+            <div ngbAccordionItem [collapsed]="false" *ngFor="let shipping_rule of (shipping$ | async)?.shipping_rules">
+                <div ngbAccordionHeader>
+                    <button ngbAccordionButton>{{ shipping_rule?.name }}</button>
+                </div>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <app-form-shipping [data]="shipping_rule"></app-form-shipping>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <app-no-data [image]="'assets/svg/no-category.svg'" [text]="'No Data Found'"
+            *ngIf="!(shipping$ | async)?.shipping_rules?.length">
+        </app-no-data>
+    </div>
+</app-page-wrapper>
+<app-shipping-rule-modal #createShippingRuleModal></app-shipping-rule-modal>

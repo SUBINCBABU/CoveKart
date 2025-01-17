@@ -1,0 +1,18 @@
+<app-breadcrumb [breadcrumb]="breadcrumb"></app-breadcrumb>
+<!-- Product Details Layout -->
+<section class="product-section" [class.section-b-space]="!product.related_products.length">
+    <app-product-thumbnail [product]="product" [option]="themeOptions$ | async" *ngIf="layout == 'product_thumbnail'"></app-product-thumbnail>
+    <app-product-images [product]="product" [option]="themeOptions$ | async" *ngIf="layout == 'product_images'"></app-product-images>
+    <app-product-slider [product]="product" [option]="themeOptions$ | async" *ngIf="layout == 'product_slider'"></app-product-slider>
+    <app-product-sticky [product]="product" [option]="themeOptions$ | async" *ngIf="layout == 'product_sticky'"></app-product-sticky>
+    <app-product-accordion [product]="product" [option]="themeOptions$ | async" *ngIf="layout == 'product_accordion'"></app-product-accordion>
+</section>
+<!-- Related Products -->
+<section class="product-list-section section-b-space"
+    *ngIf="product.related_products?.length">
+    <app-related-products [product]="product$ | async"></app-related-products>
+</section>
+
+<!-- Sticky Cart Box Start -->
+<app-sticky-checkout [product]="product"></app-sticky-checkout>
+<!-- Sticky Cart Box End -->

@@ -1,0 +1,10 @@
+<li>{{ data[key] }}
+    <a href="javascript:void(0)" class="select-btn" [class.selected]="selectedPillIds.includes(data.id)"
+        (click)="select(data)">
+        {{ selectedPillIds.includes(data.id) ? 'Selected' : 'Select' }}
+    </a>
+    <a href="javascript:void(0)" *ngIf="data[subArrayKey]?.length" class="right-arrow"
+        (click)="onArrowClick($event, data)">
+        <i class="ri-arrow-right-s-line"></i>
+    </a>
+</li>

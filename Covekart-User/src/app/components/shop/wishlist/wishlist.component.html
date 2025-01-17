@@ -1,0 +1,27 @@
+<app-breadcrumb [breadcrumb]="breadcrumb"></app-breadcrumb>
+<section class="wishlist-section section-b-space">
+  <div class="container-fluid-lg">
+      <ng-container *ngIf="wishlistService.skeletonLoader else productContent">
+        <div class="row g-sm-3 g-2">
+          <div class="col-xxl-2 col-lg-3 col-md-4 col-6 product-box-contain" *ngFor="let item of skeletonItems">
+            <app-skeleton-product-box></app-skeleton-product-box>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #productContent>
+        <div class="row g-sm-3 g-2">
+          <div class="col-xxl-2 col-lg-3 col-md-4 col-6 product-box-contain" 
+            *ngFor="let product of (wishlistItems$ | async)?.data">
+            <app-product-box [product]="product" [close]="true" [class]="'product-box-3'" [style]="'horizontal'"></app-product-box>
+          </div>
+        </div>
+      </ng-template>
+    <app-no-data 
+      [class]="'no-data-added'" 
+      [image]="'assets/svg/empty-items.svg'"
+      [text]="'No Items Added'" 
+      [description]="'It appears that nothing has been added to your wishlist. Explore categories if you want to.'" 
+      *ngIf="!(wishlistItems$ | async)?.data?.length && !wishlistService.skeletonLoader">
+    </app-no-data>
+  </div>
+</section>

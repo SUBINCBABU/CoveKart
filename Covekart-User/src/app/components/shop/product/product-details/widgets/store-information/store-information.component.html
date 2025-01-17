@@ -1,0 +1,40 @@
+<div class="vendor-box">
+  <div class="vendor-contain">
+    <a href="javascript:void(o)" [routerLink]="['/seller/store/', store?.slug]">
+      <div class="vendor-image" *ngIf="store?.store_logo else storeTextLogo">
+        <img [src]="store?.store_logo?.original_url" alt="{{ store?.store_name }}">
+        <!-- <img [src]="'data:' +store?.store_logo?.mimetype + ';base64,' +store?.store_logo?.buffer" alt="{{ store?.id }}"> -->
+      </div>
+      <ng-template #storeTextLogo>
+        <h2 class="vendor-text">{{ store?.store_name?.charAt(0)!.toString().toUpperCase() }}</h2>
+      </ng-template>
+    </a>
+    <div class="vendor-name">
+      <a href="javascript:void(o)" [routerLink]="['/seller/store/', store?.slug]">
+        <h5 class="fw-500">{{ store?.store_name }}</h5>
+      </a>
+      <div class="product-rating">
+        <ngb-rating [rate]="store?.rating_count!"></ngb-rating>
+        <span class="rating-content">({{ store?.reviews_count }} {{ 'review' | translate }})</span>
+      </div>
+    </div>
+  </div>
+  <p class="vendor-detail" [innerHTML]="store?.description! | summary:200"></p>
+  <div class="vendor-list" *ngIf="!store?.hide_vendor_email && !store?.hide_vendor_email">
+    <ul>
+      <li *ngIf="!store?.hide_vendor_phone">
+        <div class="address-contact">
+          <i class="ri-smartphone-line"></i>
+          <h5>{{ 'contact' | translate }}: <span class="text-content">+{{ store?.vendor?.country_code }} {{ store?.vendor?.phone }}</span>
+          </h5>
+        </div>
+      </li>
+      <li *ngIf="!store?.hide_vendor_email">
+        <div class="address-contact">
+          <i class="ri-mail-line"></i>
+          <h5>{{ 'email' | translate }}: <span class="text-content">{{ store?.vendor?.email }}</span></h5>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

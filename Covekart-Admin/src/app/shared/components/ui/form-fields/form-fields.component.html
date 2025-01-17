@@ -1,0 +1,8 @@
+<div [class]="class">
+  <label [attr.for]="for" [class]="labelClass">
+    {{ label | translate }}<span class="theme-color ms-2 required-dot" *ngIf="required">*</span>
+  </label>
+  <div [class]="gridClass">
+    <ng-content></ng-content>
+  </div>
+</div>

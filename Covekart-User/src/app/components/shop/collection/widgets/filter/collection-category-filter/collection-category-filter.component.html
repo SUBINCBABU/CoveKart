@@ -1,0 +1,14 @@
+<ul class="category-list custom-padding custom-height" *ngIf="categories.length">
+    <li *ngFor="let category of categories">
+        <div class="form-check ps-0 m-0 category-list-box">
+            <input class="checkbox_animated" type="checkbox" 
+                id="category-{{category.id}}"
+                [value]="category.slug"
+                [checked]="checked(category.slug!)"
+                (change)="applyFilter($event)">
+            <label class="form-check-label" for="category-{{category.id}}">
+                <span class="name">{{ category.name }}</span>
+            </label>
+        </div>
+    </li>
+</ul>

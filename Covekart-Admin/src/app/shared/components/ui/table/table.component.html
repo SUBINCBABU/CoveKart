@@ -1,0 +1,231 @@
+<div class="show-box" *ngIf="topbar">
+    <div class="selection-box">
+        <label>{{ 'show' | translate }} :</label>
+        <select class="form-control" (change)="onChangeTable($event, 'paginate')">
+            <option *ngFor="let item of rows" [value]="item">{{item}}</option>
+        </select>
+        <label>{{ 'items_per_page' | translate }}</label>
+        <a href="javascript:void(0)" class="align-items-center btn btn-outline btn-sm d-flex"
+            (click)="DeleteModal.openModal('deleteAll', selected)" *ngIf="deleteButtonStatus">
+            <i [class]="'ri-delete-bin-line'"></i> {{ 'delete' | translate }}
+        </a>
+        <a href="javascript:void(0)" class="align-items-center btn btn-outline btn-sm d-flex"
+            (click)="ConfirmationModal.openModal('duplicate', selected); 
+            $event.preventDefault(); $event.stopPropagation()" *ngIf="duplicateButtonStatus && hasDuplicate">
+            <i [class]="'ri-file-copy-line'"></i> {{ 'duplicate' | translate }}
+        </a>
+    </div>
+    <div class="role-search">
+        <div class="datepicker-wrap">
+            <ng-container *ngIf="dateRange">
+                <div class="dp-hidden position-absolute custom-dp-dropdown">
+                    <div class="input-group">
+                        <input name="datepicker" class="form-control" ngbDatepicker
+                            #datepicker="ngbDatepicker" [autoClose]="'outside'"
+                            (dateSelect)="onDateSelection($event)" [displayMonths]="2"
+                            [dayTemplate]="t" outsideDays="hidden" [startDate]="fromDate!"
+                            [footerTemplate]="footerTemplate"
+                            id="start_date" tabindex="-1" readonly/>
+                        <ng-template #t let-date let-focused="focused">
+                            <span class="custom-day" [class.focused]="focused"
+                                [class.range]="isRange(date)"
+                                [class.faded]="isHovered(date) || isInside(date)"
+                                (mouseenter)="hoveredDate = date"
+                                (mouseleave)="hoveredDate = null">
+                                {{ date.day }}
+                            </span>
+                        </ng-template>
+                    </div>
+                </div>
+                <div class="input-group custom-dt-picker me-3">
+                    <input #dpFromDate class="form-control" placeholder="yyyy-mm-dd"
+                        name="dpFromDate" [value]="formatter.format(fromDate)" id="end_date"
+                        (input)="fromDate = validateInput(fromDate, dpFromDate.value)" readonly/>
+                    <button class="btn btn-outline-secondary " (click)="datepicker.toggle()"
+                        type="button">
+                        <i class="ri-calendar-line"></i>
+                    </button>
+                </div>
+
+                <div class="input-group custom-dt-picker me-3">
+                    <input #dpToDate class="form-control" placeholder="yyyy-mm-dd"
+                        name="dpToDate" [value]="formatter.format(toDate)"
+                        (input)="toDate = validateInput(toDate, dpToDate.value)" readonly/>
+                    <button class="btn btn-outline-secondary" (click)="datepicker.toggle()"
+                        type="button">
+                        <i class="ri-calendar-line"></i>
+                    </button>
+                </div>
+
+                <ng-template #footerTemplate>
+                    <hr class="my-0" />
+                    <button class="btn btn-primary btn-sm m-2 float-start" (click)="clearDateRange(); datepicker.close()">Clear</button>
+                    <button class="btn btn-secondary btn-sm m-2 float-end" (click)="datepicker.close()">Close</button>
+                </ng-template>
+            </ng-container>
+        </div>
+
+        <div class="table-search">
+            <label for="role-search" class="form-label">{{ 'search' | translate }} :</label>
+            <input type="search" class="form-control" id="role-search" [formControl]="term">
+        </div>
+    </div>
+</div>
+<div>
+    <div class="table-responsive datatable-wrapper border-table">
+        <div class="table-loader" *ngIf="(loadingStatus$ | async) && loading">
+            <span>{{ 'please_wait' | translate }}...</span>
+        </div>
+        <table class="table all-package theme-table no-footer">
+            <thead>
+                <tr>
+                    <th class="sm-width" *ngIf="hasCheckbox">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input checkbox_animated" id="table-checkbox"
+                                [checked]="(tableConfig?.data?.length && selected?.length == tableConfig?.data?.length) || false"
+                                (change)="checkUncheckAll($event)">
+                            <label class="custom-control-label" for="table-checkbox">&nbsp;</label>
+                        </div>
+                    </th>
+                    <th [ngClass]="{'sm-width': columnHead?.type == 'no' || columnHead?.type == 'image'}"
+                        [class.cursor-pointer]="columnHead?.sortable"
+                        (click)="columnHead?.sortable && onChangeTable(columnHead, 'sort')"
+                        *ngFor="let columnHead of tableConfig?.columns">
+                        {{ columnHead?.title | translate }}
+                        <div class="filter-arrow" *ngIf="columnHead?.sortable">
+                            <div>
+                                <i class="ri-arrow-up-s-fill"
+                                    *ngIf="columnHead?.sort_direction && columnHead?.sort_direction === 'desc'"></i>
+                                <i class="ri-arrow-down-s-fill"
+                                    *ngIf="columnHead?.sort_direction && columnHead?.sort_direction === 'asc'"></i>
+                            </div>
+                        </div>
+                    </th>
+                    <th *ngIf="tableConfig?.rowActions?.length">{{ 'actions' | translate }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let columnData of tableConfig?.data; let i = index">
+                    <td class="sm-width" *ngIf="hasCheckbox">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input checkbox_animated"
+                                id="table-checkbox-item-{{columnData.id}}"
+                                [disabled]="columnData['system_reserve'] == '1'" [value]="columnData?.id"
+                                [checked]="columnData['system_reserve'] != '1' && selected?.length && selected.includes(columnData?.id)"
+                                (change)="onItemChecked($event)">
+                            <label class="custom-control-label"
+                                for="table-checkbox-item-{{columnData.id}}">&nbsp;</label>
+                        </div>
+                    </td>
+                    <td [ngClass]="{'sm-width': columnHead?.type == 'no' || columnHead?.type == 'image'}"
+                        class="cursor-pointer"
+                        (click)="columnHead.type != 'switch' && columnData['system_reserve'] != '1' ? onRowClicked(columnData) : true"
+                        *ngFor="let columnHead of tableConfig?.columns">
+                        <ng-container *ngIf="columnHead?.type && columnHead?.type == 'no'; else image">
+                            {{ i + 1 + (tableData['page'] - 1) * tableData['paginate'] }}
+                        </ng-container>
+                        <ng-template #image>
+                            <ng-container *ngIf="columnHead?.type && columnHead?.type == 'image'; else switch">
+                                <img [class]="columnHead?.class"
+                                    [src]="columnData[columnHead?.dataField.toString()]?.original_url" alt="image"
+                                    *ngIf="columnData[columnHead?.dataField.toString()] else placeholderImage">
+                            </ng-container>
+                            <ng-template #placeholderImage>
+                                <img [class]="columnHead?.class" [src]="columnHead?.placeholder" alt="placeholder"
+                                    *ngIf="columnHead?.placeholder else textImage">
+                            </ng-template>
+                            <ng-template #textImage>
+                                <div class="user-round">
+                                    <h4>{{ columnData?.[columnHead?.key ? columnHead?.key?.toString() :
+                                        'name'].charAt(0).toString().toUpperCase() || 'F' }}</h4>
+                                </div>
+                            </ng-template>
+                        </ng-template>
+                        <ng-template #switch>
+                            <ng-container *ngIf="columnHead?.type && columnHead?.type == 'switch'; else price">
+                                <div class="form-check form-switch ps-0">
+                                    <label class="switch switch-sm">
+                                        <input type="checkbox" id="status-{{i}}"
+                                            [disabled]="columnData['system_reserve'] == '1' || !hasPermission(['edit'])"
+                                            [value]="columnData[columnHead?.dataField.toString()] == '1' ? 0 : 1"
+                                            [checked]="columnData[columnHead?.dataField.toString()] == '1' ? true : false"
+                                            (click)="ConfirmationModal.openModal(columnHead?.dataField.toString(), columnData, 
+                                                columnData[columnHead?.dataField.toString()] == '1' ? 0 : 1); 
+                                                $event.preventDefault(); $event.stopPropagation()">
+                                        <span class="switch-state"
+                                            [class.disabled]="columnData['system_reserve'] == '1' || !hasPermission(['edit'])"></span>
+                                    </label>
+                                </div>
+                            </ng-container>
+                        </ng-template>
+                        <ng-template #price>
+                            <ng-container *ngIf="columnHead?.type && columnHead?.type == 'price'; else date">
+                                {{ columnData[columnHead?.dataField] | currencySymbol }}
+                            </ng-container>
+                        </ng-template>
+                        <ng-template #date>
+                            <ng-container *ngIf="columnHead?.type && columnHead?.type == 'date'; else rating">
+                                {{ 
+                                    columnData[columnHead?.dataField.toString()] 
+                                    | date: columnHead?.date_format ? columnHead?.date_format : 'dd MMM yyyy hh:mm:a'
+                                }}
+                            </ng-container>
+                        </ng-template>
+                        <ng-template #rating>
+                            <ng-container *ngIf="columnHead?.type && columnHead?.type == 'rating'; else content">
+                                <ngb-rating class="rating-sec" [rate]="columnData[columnHead?.dataField]"></ngb-rating>
+                            </ng-container>
+                        </ng-template>
+                        <ng-template #content>
+                            <div [innerHtml]="columnData[columnHead?.dataField.toString()]"></div>
+                        </ng-template>
+                    </td>
+                    <td *ngIf="tableConfig?.rowActions?.length">
+                        <ul id="actions">
+                            <a href="javascript:void(0)" *ngIf="columnData['system_reserve'] == '1'; else action">
+                                <i [class]="'ri-lock-line'"></i>
+                            </a>
+                            <ng-template #action>
+                                <ng-container *ngFor="let action of tableConfig?.rowActions">
+                                    <ng-container *hasPermission="action.permission">
+                                        <li>
+                                            <a href="javascript:void(0)" (click)="action?.actionToPerform == 'delete' 
+                                                    ? DeleteModal.openModal('delete', columnData) 
+                                                    : onActionClicked(action?.actionToPerform.toString(), columnData)">
+                                                <i [class]="action?.icon"></i>
+                                            </a>
+                                        </li>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-template>
+                        </ul>
+                    </td>
+                </tr>
+                <tr *ngIf="!tableConfig?.data?.length">
+                    <td
+                        [attr.colspan]="hasCheckbox ? (tableConfig?.rowActions?.length ? (tableConfig?.columns?.length + 1) : tableConfig?.columns?.length) + 1 
+                                                    : (tableConfig?.rowActions?.length ? (tableConfig?.columns?.length + 1) : tableConfig?.columns?.length)">
+                        <div class="no-data-added">
+                            <h4>{{ 'no_records_found' | translate }}</h4>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<nav class="custom-pagination" *ngIf="pagination">
+    <app-pagination [total]="tableConfig?.total" [currentPage]="tableData['page']" [pageSize]="tableData['paginate']"
+        (setPage)="onChangeTable($event, 'page')">
+    </app-pagination>
+</nav>
+
+<app-delete-modal 
+    #deleteModal 
+    (deleteItem)="onActionClicked($event?.actionToPerform, $event?.data)">
+</app-delete-modal>
+
+<app-confirmation-modal 
+    #confirmationModal
+    (confirmed)="onActionClicked($event?.actionToPerform, $event?.data, $event?.value)">
+</app-confirmation-modal>
