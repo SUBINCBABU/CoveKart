@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  URL: 'http://localhost:4200/assets/data',
+  URL: 'https://covekart-admin.onrender.com/assets/data',
   configUrl:"https://covekart-api.onrender.com/"
 };
 
