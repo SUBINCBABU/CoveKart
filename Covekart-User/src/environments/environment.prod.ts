@@ -6,7 +6,7 @@ export const environment = {
   production: true,
   baseURL: 'https://angular.pixelstrap.net/fastkart',
   URL: 'https://angular.pixelstrap.net/fastkart/assets/data',
-  configUrl :'http://localhost:3000/'
+  configUrl :'https://covekart-api.onrender.com/'
 
 };
   
