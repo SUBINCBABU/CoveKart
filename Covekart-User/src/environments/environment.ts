@@ -4,11 +4,10 @@
 
 export const environment = {
   production: false,
-  baseURL: 'https://covekart-user.onrender.com/',
-  URL: 'https://covekart-user.onrender.com/assets/data',
-  configUrl :'https://covekart-api.onrender.com/'
-
+  URL: 'http://localhost:4200/assets/data',
+  configUrl:"https://covekart-api.onrender.com/"
 };
+
 
 /*
 * For easier debugging in development mode, you can import the following file
