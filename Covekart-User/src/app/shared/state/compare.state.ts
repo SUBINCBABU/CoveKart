@@ -35,26 +35,26 @@ export class CompareState {
     return state.total;
   }
 
-  @Action(GetCompare)
-  getCompareItems(ctx: StateContext<GetCompare>) {
-    this.compareService.skeletonLoader = true;
-    return this.compareService.getCompareItems().pipe(
-      tap({
-        next: result => {
-          ctx.patchState({
-            items: result.data,
-            total: result?.total ? result?.total : result.data?.length
-          });
-        },
-        complete: () => {
-          this.compareService.skeletonLoader = false;
-        },
-        error: err => {
-          throw new Error(err?.error?.message);
-        }
-      })
-    );
-  }
+  // @Action(GetCompare)
+  // getCompareItems(ctx: StateContext<GetCompare>) {
+  //   this.compareService.skeletonLoader = true;
+  //   return this.compareService.getCompareItems().pipe(
+  //     tap({
+  //       next: result => {
+  //         ctx.patchState({
+  //           items: result.data,
+  //           total: result?.total ? result?.total : result.data?.length
+  //         });
+  //       },
+  //       complete: () => {
+  //         this.compareService.skeletonLoader = false;
+  //       },
+  //       error: err => {
+  //         throw new Error(err?.error?.message);
+  //       }
+  //     })
+  //   );
+  // }
 
   @Action(AddToCompare)
   add(ctx: StateContext<CompareStateModel>, action: AddToCompare){
