@@ -4,7 +4,7 @@
 
 export const environment = {
     production: true,
-    URL: 'https://angular.pixelstrap.net/fastkart-admin/assets/data',
+    URL: 'https://covekart-admin.onrender.com/assets/data',
     configUrl:"https://covekart-api.onrender.com/"
 };
   
