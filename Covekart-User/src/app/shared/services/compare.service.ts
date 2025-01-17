@@ -13,8 +13,8 @@ export class CompareService {
   
   constructor(private http: HttpClient) { }
  
-  getCompareItems(): Observable<CompareModel> {
-    return this.http.get<CompareModel>(`${environment.baseURL}getCompare`);
-  }
+  // getCompareItems(): Observable<CompareModel> {
+  //   return this.http.get<CompareModel>(`${environment.baseURL}getCompare`);
+  // }
 
 }
