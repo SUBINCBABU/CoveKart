@@ -8,6 +8,7 @@ import {
 import { Cart, CartModel } from "../interface/cart.interface";
 import { CartService } from "../services/cart.service";
 import { NotificationService } from "../services/notification.service";
+import { Router } from "@angular/router";
 
 export interface CartStateModel {
   items: Cart[];
@@ -28,7 +29,7 @@ export interface CartStateModel {
 @Injectable()
 export class CartState {
 
-  constructor(private cartService: CartService,
+  constructor(private cartService: CartService, private router: Router,
     private notificationService: NotificationService,
     private store: Store) {
   }
@@ -91,7 +92,7 @@ export class CartState {
   //   return this.cartService.add(action.payload).pipe(
   //     tap({
   //       next: (result) => {
-         
+
   //         const state = ctx.getState();
 
   //         const updatedItems = [...state.items, result];
@@ -120,42 +121,44 @@ export class CartState {
 
 
 
-@Action(AddToCart)
-add(ctx: StateContext<CartStateModel>, action: AddToCart) {
-  return this.cartService.add(action.payload).pipe(
-    tap({
-      next: (result) => {
-        const state = ctx.getState();
+  @Action(AddToCart)
+  add(ctx: StateContext<CartStateModel>, action: AddToCart) {
+    return this.cartService.add(action.payload).pipe(
+      tap({
+        next: (result) => {
+          const state = ctx.getState();
 
-        const updatedItems = [...state.items, result];
-        const total = updatedItems.reduce((sum, item) => sum + item.sub_total, 0);
+          const updatedItems = [...state.items, result];
+          const total = updatedItems.reduce((sum, item) => sum + item.sub_total, 0);
 
-        ctx.patchState({
-          items: updatedItems,
-          total: total,
-          stickyCartOpen: true,
-        });
+          ctx.patchState({
+            items: updatedItems,
+            total: total,
+            stickyCartOpen: true,
+          });
 
-        // Automatically close sticky cart after a delay
-        setTimeout(() => {
-          ctx.patchState({ stickyCartOpen: false });
-        }, 3000);
+          // Automatically close sticky cart after a delay
+          setTimeout(() => {
+            ctx.patchState({ stickyCartOpen: false });
+          }, 3000);
 
-        // Show success notification
-        this.notificationService.showSuccess("Item has been added to your cart!");
-      },
-      error: (error) => {
-        // Check for specific error type or message
-        if (error?.status === 401) {
-          this.notificationService.showError("You must be logged in to add items to your cart.");
-        } else {
-          this.notificationService.showError("An error occurred while adding the item to your cart. Please try again.");
-        }
-        console.error(error);
-      },
-    })
-  );
-}
+          // Show success notification
+          this.notificationService.showSuccess("Item has been added to your cart!");
+        },
+        error: (error) => {
+          // Check for specific error type or message
+          if (error?.status === 401) {
+            // this.router.navigateByUrl("/auth/login");
+            this.notificationService.showError("You must be logged in to add items to your cart.");
+          } else {
+            // this.router.navigateByUrl("/auth/login");
+            this.notificationService.showError("An error occurred while adding the item to your cart. Please try again.");
+          }
+          console.error(error);
+        },
+      })
+    );
+  }
 
 
 

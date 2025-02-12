@@ -40,7 +40,8 @@ export class AttachmentState {
 getAttachments(ctx: StateContext<AttachmentStateModel>, action: GetAttachments) {
   return this.attachmentService.getAttachments(action.payload).pipe(
     tap({
-      next: result => { 
+      next: result => {
+       
         // On success, update the state with the result
         ctx.patchState({
           attachment: result
@@ -70,10 +71,13 @@ create(ctx: StateContext<AttachmentStateModel>, action: CreateAttachment) {
   return this.attachmentService.uploadFiles(action.payload).pipe(
     tap({
       next: (newAttachments) => {
+        console.log("getAttachment :",newAttachments);
+         
         const state = ctx.getState();
 
         // Ensure newAttachments is an array and contains valid data
         if (Array.isArray(newAttachments) && newAttachments.length > 0) {
+        
           // Update the state with the new attachments
           ctx.patchState({
             attachment: {
@@ -82,20 +86,22 @@ create(ctx: StateContext<AttachmentStateModel>, action: CreateAttachment) {
               total: state.attachment.total + newAttachments.length // Update the total count of attachments
             }
           });
-          window.location.reload();
+         
+          
+        //  window.location.reload();
          
           this.notificationService.success("Files uploaded successfully");
 
           
          
         } else {
-          window.location.reload();
+          //window.location.reload();
           
           this.notificationService.error("No valid attachments received.");
         }
       },
       error: (err) => {
-        window.location.reload();
+        //window.location.reload();
         this.notificationService.error("Failed to upload files");
         console.error("Upload error:", err);
       }
