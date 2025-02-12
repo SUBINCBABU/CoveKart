@@ -20,29 +20,43 @@ export class AttachmentService {
 
 
 
-  uploadFiles(files: File[]): Observable<Attachment[]> {
-    const formData = new FormData();
+  // uploadFiles(files: File[]): Observable<Attachment[]> {
+  //   const formData = new FormData();
 
+  //   files.forEach((file) => {
+  //     formData.append('files', file, file.name);
+  //   });
+  //   const uploadUrl = `${environment.configUrl}createImages`;
+
+  //   return this.http.post<{ message: string, files: Attachment[] }>(uploadUrl, formData).pipe(
+  //     map(response => {
+      
+  //       if (response && Array.isArray(response)) {
+  //         console.log("attchment service ",response);
+        
+  //         return response;
+  //       }
+  //       throw new Error('Unexpected response structure');
+  //     }),
+  //     catchError((error) => {
+  //       console.error('Error uploading files:', error);
+
+  //       return throwError(() => new Error('Failed to upload files'));
+  //     })
+  //   );
+  // }
+
+
+
+  uploadFiles(files: File[]): Observable<{ message: string, files: Attachment[] }> {
+    const formData = new FormData();
     files.forEach((file) => {
       formData.append('files', file, file.name);
     });
-    const uploadUrl = `${environment.configUrl}createImages`;
-
-    return this.http.post<{ message: string, files: Attachment[] }>(uploadUrl, formData).pipe(
-      map(response => {
-        if (response && response.files && Array.isArray(response.files)) {
-          return response.files;
-        }
-        throw new Error('Unexpected response structure');
-      }),
-      catchError((error) => {
-        console.error('Error uploading files:', error);
-
-        return throwError(() => new Error('Failed to upload files'));
-      })
-    );
+    const uploadUrl = `${environment.configUrl}createImages`
+    return this.http.post<{ message: string, files: Attachment[] }>(uploadUrl, formData);
   }
-
+  
 
   deleteAttachment(id: number): Observable<void> {
     const url = `${environment.configUrl}deleteImage/${id}`;

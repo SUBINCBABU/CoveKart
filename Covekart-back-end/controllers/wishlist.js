@@ -67,7 +67,7 @@ export const postWishlist = async (req, res) => {
 export const getWishlist = async (req, res) => {
     try {
         if (!current_user || current_user.length === 0) {
-            return res.status(400).json({ error: "Current user not found or not logged in." });
+            return res.status(200).json({ error: "Current user not found or not logged in." ,data:null});
         }
         const user = await userModel.findOne({ id: current_user[0].id }).lean();
         if (!user) {

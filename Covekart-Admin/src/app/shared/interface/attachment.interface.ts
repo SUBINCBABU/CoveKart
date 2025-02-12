@@ -20,7 +20,7 @@ export interface Attachment {
     created_at?: string;
     updated_at?: string;
     deleted_at?: string;
-    buffer: string;  
-     mimetype: string;       
-  originalname: string; 
+    buffer: string;
+    mimetype: string;
+    originalname: string;
 }

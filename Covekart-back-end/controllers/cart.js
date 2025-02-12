@@ -57,6 +57,73 @@ export const createCart = async (req, res) => {
     }
 };
 
+
+// export const createCart = async (req, res) => {
+//     try {
+//         // Check if user is authenticated
+//         if (!current_user || !current_user[0]) {
+//             return res.status(401).json({ message: "Please login" });
+//         }
+
+//         const { product, quantity, id, product_id, variation_id } = req.body;
+
+//         // Validate required fields
+//         if (!product || !quantity || !product_id) {
+//             return res.status(400).json({ message: "Missing required fields" });
+//         }
+
+//         const price = product.sale_price;
+//         const total_price = quantity * price;
+
+//         if (id) {
+//             // If cart ID exists, update the existing cart
+//             const current_cart = await cartModel.findOne({ id }).lean();
+
+//             if (!current_cart) {
+//                 return res.status(404).json({ message: "Cart not found" });
+//             }
+
+//             const updatedQuantity = current_cart.quantity + quantity;
+
+//             const updateData = {
+//                 $set: {
+//                     quantity: updatedQuantity,
+//                     sub_total: updatedQuantity * price,
+//                 },
+//             };
+
+//             const updatedCart = await cartModel.findOneAndUpdate(
+//                 { id },
+//                 updateData,
+//                 { new: true }
+//             );
+//             const result=await cartModel.findOne({id:req.body.id})         
+//             return res.status(200).json(result);
+//         }
+
+//         // If no cart ID, create a new cart
+//         const numericId = await generateNumericId();
+
+//         const newCart = new cartModel({
+//             id: numericId,
+//             product_id,
+//             variation_id,
+//             consumer_id: current_user[0].id,
+//             quantity,
+//             sub_total: total_price,
+//             product,
+//         });
+
+//         const savedCart = await newCart.save();
+//         res.status(201).json(savedCart);
+//     } catch (error) {
+//         console.error(`Error creating cart: ${error.message}`);
+//         res.status(500).json({ message: `Failed to create cart: ${error.message}` });
+//     }
+// };
+
+
+
 export const getCart = async (req, res) => {
     try {   
         if (!current_user || !current_user[0]) {
@@ -80,30 +147,30 @@ export const getCart = async (req, res) => {
 
 
 
+
 export const deleteCart = async (req, res) => {
     try {
-        if(!current_user[0]){
+        if (!current_user[0]) {
             return res.status(404).json({ message: "login" });
         }
 
-        if(current_user[0]){
-            
+        if (current_user[0]) {
+
             const { id } = req.params;
             const cartItem = await cartModel.findOne({ id });
 
             if (!cartItem) {
                 return res.status(404).json({ message: "Cart item not found." });
             }
-    
+
             await cartModel.deleteOne({ id });
-    
-    
+
+
             res.status(200).json({ message: "Cart item deleted successfully." });
         }
-        
+
     } catch (error) {
         console.error(`Error deleting cart item: ${error.message}`);
         res.status(500).json({ message: "Failed to delete cart item.", error: error.message });
     }
 };
-    

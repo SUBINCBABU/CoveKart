@@ -6,6 +6,7 @@ import { Cart, CartAddOrUpdate } from '../../../shared/interface/cart.interface'
 import { CartState } from '../../../shared/state/cart.state';
 import { UpdateCart, DeleteCart } from '../../../shared/action/cart.action';
 import { AddToWishlist } from '../../../shared/action/wishlist.action';
+import { AuthState } from 'src/app/shared/state/auth.state';
 
 @Component({
   selector: 'app-cart',
@@ -25,6 +26,9 @@ export class CartComponent {
   constructor(private store: Store) {}
 
   updateQuantity(item: Cart, qty: number) {
+  
+    
+   // const data=this.store.selectSnapshot(AuthState.token)
    
     const params: CartAddOrUpdate = {
       id: item.id,
