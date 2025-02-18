@@ -116,7 +116,7 @@ userRouter.post("/deleteAllStores",deleteAllStore)
 
 
 //Cart 
-userRouter.post("/createCart",verified,createCart)
+userRouter.post("/createCart",createCart)
 userRouter.get("/getCart",getCart)
 userRouter.delete("/deleteCart/:id",deleteCart)
 

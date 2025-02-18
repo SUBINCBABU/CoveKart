@@ -4,10 +4,11 @@
 
 export const environment = {
     production: true,
-    URL: 'https://covekart-admin.onrender.com/assets/data',
-    configUrl:"https://covekart-api.onrender.com/"
-};
+    baseURL: 'https://angular.pixelstrap.net/fastkart',
+    URL: 'https://angular.pixelstrap.net/fastkart/assets/data',
+    configUrl :'http://localhost:3000/'
   
+  };
 /*
 * For easier debugging in development mode, you can import the following file
 * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.

@@ -4,8 +4,10 @@
 
 export const environment = {
   production: false,
-  URL: 'https://covekart-admin.onrender.com/assets/data',
-  configUrl:"https://covekart-api.onrender.com/"
+  baseURL: 'https://covekart-user.onrender.com/',
+  URL: 'https://covekart-user.onrender.com/assets/data',
+  configUrl :'http://localhost:3000/'
+
 };
 
 /*

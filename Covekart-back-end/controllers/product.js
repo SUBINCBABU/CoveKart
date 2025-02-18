@@ -103,7 +103,7 @@ export const postAddProduct = async (req, res) => {
 
         const numericId = await generateNumericId();
         const sale_price = calculateSalePrice(price, discount);
-        const slug = generateSlug(name);   
+        const slug = generateSlug(name);
 
 
         const productData = {
@@ -123,7 +123,7 @@ export const postAddProduct = async (req, res) => {
             size_chart_image: size_chart_image || null,
             product_meta_image: product_meta_image || null,
             tax: tax || null,
-            pivot:{},
+            pivot: {},
             ...otherFields
         };
 
@@ -142,22 +142,200 @@ export const postAddProduct = async (req, res) => {
     }
 };
 
+// export const getProduct = async (req, res) => {
+//     try {
+//         const { page = 1, limit = 10, sort, filter } = req.query;
+//         const skip = (page - 1) * limit;
+
+//         const query = {};
+//         if (filter) {
+
+//         }
+
+//         const [products, total] = await Promise.all([
+//             productModel.find(query)
+//                 .sort(sort || { createdAt: -1 })
+//                 .skip(skip)
+//                 .limit(parseInt(limit))
+//                 .lean(),
+//             productModel.countDocuments(query)
+//         ]);
+
+//         if (!products.length) {
+//             return res.status(404).json({ message: "No products found" });
+//         }
+
+//         res.status(200).json({
+//             data: products,
+//             pagination: {
+//                 total,
+//                 page: parseInt(page),
+//                 pages: Math.ceil(total / limit)
+//             }
+//         });
+
+//     } catch (error) {
+//         console.error("Error in getProduct:", error);
+//         res.status(500).json({
+//             message: "Failed to fetch products",
+//             error: error.message
+//         });
+//     }
+// };
+
+
+
+
+
+// export const getProduct = async (req, res) => {
+//     try {
+
+//         console.log("product query params:", req.query);
+
+//         let { page = 1, limit = 10, sort, filter, status, ids, search, paginate } = req.query;
+//         page = parseInt(page);
+//         limit = parseInt(paginate) || parseInt(limit);
+//         const skip = (page - 1) * limit;
+
+//         // Construct query object
+//         let query = {};
+//         if (status) {
+//             query.status = status;   
+//         }
+//         if (ids) {    
+//             query.id = { $in: ids.split(",").map(id => id.trim()) };
+//         }
+//         if (search) {
+//             query.$or = [
+//                 { name: { $regex: search, $options: "i" } },
+//                 { description: { $regex: search, $options: "i" } }
+//             ];
+//         }
+//         if (filter) {
+//             try {
+//                 query = { ...query, ...JSON.parse(filter) }; // Expecting a JSON string in request
+//             } catch (error) {
+//                 return res.status(400).json({ message: "Invalid filter format" });
+//             }
+//         }
+
+
+//         let sortObj = { createdAt: -1 }; // Default sort by latest created
+//         if (sort) {
+//             try {
+//                 sortObj = JSON.parse(sort); // Expecting a JSON string in request
+//             } catch (error) {
+//                 return res.status(400).json({ message: "Invalid sort format" });
+//             }
+//         }
+
+//         const [products, total] = await Promise.all([
+//             productModel.find(query)
+//                 .sort(sortObj)
+//                 .skip(skip)
+//                 .limit(limit)
+//                 .lean(),
+//             productModel.countDocuments(query)
+//         ]);
+
+//         if (!products.length) {
+//             return res.status(404).json({ message: "No products found" });
+//         }
+
+
+
+//         res.status(200).json({
+//             data: products,
+//             pagination: {
+//                 total,
+//                 page,
+//                 pages: Math.ceil(total / limit)
+//             }
+//         });
+//     } catch (error) {
+//         console.error("Error in getProduct:", error);
+//         res.status(500).json({
+//             message: "Failed to fetch products",
+//             error: error.message
+//         });
+//     }
+// };
+
+
+
+
+
 export const getProduct = async (req, res) => {
     try {
-        const { page = 1, limit = 10, sort, filter } = req.query;
+         console.log("Product query params:", req.query);
+
+        let { page = 1, limit = 10, sort, filter, status, ids, search, paginate, price, rating } = req.query;
+        page = parseInt(page) || 1;
+        limit = parseInt(paginate) || parseInt(limit) || 10;
         const skip = (page - 1) * limit;
 
-        const query = {};
-        if (filter) {
+        let query = {};
+        if (status) query.status = status;
+        if (ids) query.id = { $in: ids.split(",").map(id => id.trim()) };
 
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        if (filter) {
+            try {
+                query = { ...query, ...JSON.parse(filter) };
+            } catch (error) {
+                return res.status(400).json({ message: "Invalid filter format" });
+            }
+        }
+
+        if (price) {
+            const priceRanges = price.split(",").map(range => range.trim());
+            const priceConditions = priceRanges.map(range => {
+                if (range.includes("-")) {
+                    const [min, max] = range.split("-").map(Number);
+                    return !isNaN(min) && !isNaN(max) ? { price: { $gte: min, $lte: max } } : null;
+                } else {
+                    const fixedPrice = parseFloat(range);
+                    return !isNaN(fixedPrice) ? { price: { $lte: fixedPrice } } : null;
+                }
+            }).filter(Boolean);
+            if (priceConditions.length) {
+                query.$or = query.$or ? [...query.$or, ...priceConditions] : priceConditions;
+            }
+        }
+
+        // if (rating) {
+        //     const minRating = parseFloat(rating);
+        //     if (!isNaN(minRating)) {
+        //         query.rating_count = { $gte: minRating };
+        //     }
+        // }
+
+        // Handle rating filtering
+        if (rating) {
+            const ratingValues = rating.split(",").map(value => parseFloat(value.trim())).filter(value => !isNaN(value));
+            if (ratingValues.length) {
+                query.rating_count = { $gte: Math.min(...ratingValues) }; // Use the lowest value as the threshold
+            }
+        }
+
+
+        let sortObj = { createdAt: -1 };
+        if (sort) {
+            try {
+                sortObj = JSON.parse(sort);
+            } catch (error) {
+                return res.status(400).json({ message: "Invalid sort format" });
+            }
         }
 
         const [products, total] = await Promise.all([
-            productModel.find(query)
-                .sort(sort || { createdAt: -1 })
-                .skip(skip)
-                .limit(parseInt(limit))
-                .lean(),
+            productModel.find(query).sort(sortObj).skip(skip).limit(limit).lean(),
             productModel.countDocuments(query)
         ]);
 
@@ -165,15 +343,56 @@ export const getProduct = async (req, res) => {
             return res.status(404).json({ message: "No products found" });
         }
 
+        const modifiedProducts = products.map(product => ({
+            ...product,
+            product_thumbnail: product.product_thumbnail?.original_url ? { original_url: product.product_thumbnail.original_url } : null,
+            size_chart_image: product.size_chart_image?.original_url ? { original_url: product.size_chart_image.original_url } : null,
+            store: product.store ? { id: product.store.id, store_name: product.store.store_name, slug: product.store.slug } : null,
+            categories: product.categories?.map(category => ({
+                id: category.id,
+                category_name: category.category_name,
+                slug: category.slug
+            })) || [],
+            product_galleries: product.product_galleries?.map(gallery => ({
+                id: gallery.id,
+                original_url: gallery.original_url
+            })) || [],
+            reviews: product.reviews?.map(review => ({
+                id: review.id,
+                product_id: review.product_id,
+                store_id: review.store_id,
+                rating: review.rating,
+                description: review.description,
+                consumer: review.consumer ? {
+                    id: review.consumer.id,
+                    name: review.consumer.name,
+                    email: review.consumer.email
+                } : null
+            })) || [],
+            user_review: product.user_review?.map(review => ({
+                id: review.id,
+                product_id: review.product_id,
+                store_id: review.store_id,
+                rating: review.rating,
+                description: review.description,
+                consumer: review.consumer ? {
+                    id: review.consumer.id,
+                    name: review.consumer.name,
+                    email: review.consumer.email
+                } : null
+            })) || []
+        }));
+
+        // console.log(modifiedProducts);
+
         res.status(200).json({
-            data: products,
+            data: modifiedProducts,
             pagination: {
                 total,
-                page: parseInt(page),
+                page,
                 pages: Math.ceil(total / limit)
             }
         });
-
     } catch (error) {
         console.error("Error in getProduct:", error);
         res.status(500).json({
@@ -182,6 +401,11 @@ export const getProduct = async (req, res) => {
         });
     }
 };
+
+
+
+
+
 
 export const editProduct = async (req, res) => {
     try {
@@ -401,12 +625,12 @@ export const updateProductStatus = async (req, res) => {
 
 
         if (!id) {
-          
+
             return res.status(400).json({ error: "product ID is required" });
         }
 
         if (status === undefined || status === null) {
-           
+
             return res.status(400).json({ error: "Status is required" });
         }
 
@@ -418,14 +642,14 @@ export const updateProductStatus = async (req, res) => {
 
         if (!updatedProduct) {
             console.log("not working");
-           
+
             return res.status(404).json({ error: "Product not found" });
         }
 
         res.status(200).json({ message: "Product status updated successfully", data: updateProduct });
     } catch (error) {
         console.log(" last not working");
-           
+
         console.error(`Error updating product status: ${error.message}`);
         res.status(500).json({ error: `Failed to update Product status: ${error.message}` });
     }
@@ -488,28 +712,28 @@ export const approveProductStatus = async (req, res) => {
 
         // Validate id
         if (!id) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                error: "Product ID is required" 
+                error: "Product ID is required"
             });
         }
 
         // Validate is_approved
         if (typeof is_approved !== 'number' || ![0, 1].includes(is_approved)) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                error: "is_approved must be either 0 or 1" 
+                error: "is_approved must be either 0 or 1"
             });
         }
 
         // Try to update the product
         const updatedProduct = await productModel.findOneAndUpdate(
             { id: id }, // Assuming id refers to MongoDB's _id
-            { 
+            {
                 is_approved,
                 updated_at: new Date()
             },
-            { 
+            {
                 new: true,
                 lean: true,
                 runValidators: true
@@ -518,14 +742,14 @@ export const approveProductStatus = async (req, res) => {
 
         // Check if product exists
         if (!updatedProduct) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                error: "Product not found" 
+                error: "Product not found"
             });
         }
 
         // Success response
-        return res.status(200).json({ 
+        return res.status(200).json({
             success: true,
             message: "Product status updated successfully",
             data: updatedProduct // Fixed variable name from updateProduct

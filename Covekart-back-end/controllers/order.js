@@ -226,7 +226,7 @@ export const placeOrder = async (req, res) => {
 
     try {
         const data = req.body;
-        console.log("placeOrder::", data);
+       // console.log("placeOrder::", data);
 
         if (!data.products || !Array.isArray(data.products) || data.products.length === 0) {
             return res.status(400).json({ message: "Products are required" });

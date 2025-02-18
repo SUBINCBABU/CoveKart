@@ -22,7 +22,7 @@ export class CollectionPriceFilterComponent {
       id: 2,
       minPrice: 100,
       maxPrice: 200,
-      value: '0-200'
+      value: '100-200'
     },
     {
       id: 3,
