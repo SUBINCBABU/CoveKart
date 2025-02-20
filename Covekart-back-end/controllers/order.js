@@ -4,7 +4,7 @@ import ProductModel from "../models/product_model.js";
 //import DatatatusModel from "../models/order-status_model.js";
 import userModel from "../models/user_Model.js";
 import userAddressModel from "../models/userAddress_Model.js";
-import { current_user } from "./user_controller.js";
+
 import shippingRuleModel from "../models/shippingRule_model.js";
 import shippingModel from "../models/shipping_model.js";
 import { CouponModel } from "../models/coupon_model.js";
@@ -56,7 +56,17 @@ const generateOrderNumber = async () => {
 
 export const getOrders = async (req, res) => {
     try {
-        const user = await userModel.findOne({ id: current_user[0].id });
+
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
+        }
+
+        const user = await userModel.findOne({ id: decodedData.id });
         if (!user) {
             return res.status(404).json({
                 data: null,
@@ -85,7 +95,17 @@ export const getOrders = async (req, res) => {
 export const viewOrder = async (req, res) => {
     try {
        
-        const user = await userModel.findOne({ id: current_user[0].id });
+
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
+        }
+
+        const user = await userModel.findOne({ id: decodedData.id });
         if (!user) {
             return res.status(404).json({
                 data: null,
@@ -95,7 +115,7 @@ export const viewOrder = async (req, res) => {
         if (user) {
             const data = await orderModel.find({
                 $or: [{ order_number: req.params.id },
-                { consumer_id: current_user[0].id }]
+                { consumer_id: decodedData.id }]
             }).lean({})
             const total = data.length
             const result = {
@@ -115,6 +135,16 @@ export const viewOrder = async (req, res) => {
 
 export const orderCheckout = async (req, res) => {
     try {
+
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
+        }
+
         const { products, coupon: coupon_code } = req.body;
 
         if (!products?.length) {
@@ -141,7 +171,7 @@ export const orderCheckout = async (req, res) => {
 
         }
 
-        const user = await userModel.findOne({ id: current_user[0].id });
+        const user = await userModel.findOne({ id: decodedData.id });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -225,6 +255,19 @@ export const orderCheckout = async (req, res) => {
 export const placeOrder = async (req, res) => {
 
     try {
+
+
+      
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
+        }
+
+
         const data = req.body;
        // console.log("placeOrder::", data);
 
@@ -245,7 +288,7 @@ export const placeOrder = async (req, res) => {
             return res.status(404).json({ message: "Address not found" });
         }
 
-        const consumer = await userModel.findOne({ id: current_user[0].id }).lean();
+        const consumer = await userModel.findOne({ id: decodedData.id }).lean();
         if (!consumer) {
             return res.status(404).json({ message: "Consumer not found" });
         }

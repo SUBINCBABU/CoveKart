@@ -66,7 +66,7 @@ userRouter.post("/signup/verify", postSignupVerify)
 userRouter.post("/forgotPassword", postForgotPassword)
 userRouter.post("/updatePassword", postUpdatePassword)
 userRouter.post("/userLogout", postLogout)
-userRouter.get("/getUserAccount", getUserDetails)
+userRouter.get("/getUserAccount",verified,getUserDetails)
 userRouter.put("/updateUserProfile",updateUserProfile)
 
 
@@ -124,9 +124,9 @@ userRouter.delete("/deleteCart/:id",deleteCart)
    
 
 //wishlist
-userRouter.post("/postWishlist",postWishlist)
-userRouter.get("/getWishlist",getWishlist)
-userRouter.delete("/deleteWishlist/:id",deleteWishlist)
+userRouter.post("/postWishlist",verified,postWishlist)
+userRouter.get("/getWishlist",verified,getWishlist)
+userRouter.delete("/deleteWishlist/:id",verified,deleteWishlist)
 
 
 
@@ -287,7 +287,7 @@ userRouter.delete("/deleteShippinRule/:id",deleteShippingRule)
 
 //Review
 userRouter.get("/getReview/:slug",getReview)
-userRouter.post("/addReview",postReview)
+userRouter.post("/addReview",verified,postReview)
 userRouter.get("/getReviews",getReviews) //admin side 
 userRouter.delete("/deleteReviews/:id",deleteReviews)//admin sid
 userRouter.post("/deleteAllReviews",deleteAllReviews)//admin sid

@@ -49,6 +49,7 @@ export const updateRomeTheme = async (req, res) => {
   const data = req.body;
   const id = req.params.id;
 
+
   const {
     home_banner = {},
     categories_image_list = {},
@@ -62,6 +63,7 @@ export const updateRomeTheme = async (req, res) => {
     news_letter = {},
     products_ids,
   } = data.content || {};
+  console.log("hlo",home_banner);
 
   const { status, main_banner, sub_banner_1, sub_banner_2, sub_banner_3, bg_image_url } = home_banner;
   const { category_ids, tittle } = categories_image_list;

@@ -1,6 +1,5 @@
 
 import cartModel from "../models/cart_model.js";
-import { current_user } from "./user_controller.js";
 
 
 const generateNumericId = async () => {
@@ -30,9 +29,18 @@ const generateNumericId = async () => {
 export const createCart = async (req, res) => {
          
     try {
-        if (!current_user || !current_user[0]) {
-            return res.status(400).json({ message: "please login" });
+
+        
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
         }
+
+       
         
         const product = req.body.product
         const price = product.sale_price
@@ -43,7 +51,7 @@ export const createCart = async (req, res) => {
             id: numericId,
             product_id: req.body.product_id,
             variation_id: req.body.variation_id,
-            consumer_id: current_user[0].id,
+            consumer_id: decodedData.id,
             quantity: req.body.quantity,
             sub_total: total_price,                                                                                                 
             product: req.body.product,
@@ -126,11 +134,18 @@ export const createCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
     try {   
-        if (!current_user || !current_user[0]) {
-            return res.status(200).json(null);
+        
+
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " please login" });
         }
 
-        const consumer_id = current_user[0].id;
+        const consumer_id = decodedData.id;
         const items = await cartModel.find({ consumer_id }).lean();
 
         if (!items || items.length === 0) {
@@ -150,11 +165,20 @@ export const getCart = async (req, res) => {
 
 export const deleteCart = async (req, res) => {
     try {
-        if (!current_user[0]) {
-            return res.status(404).json({ message: "login" });
+
+       
+
+       
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
         }
 
-        if (current_user[0]) {
+        if (decodedData) {
 
             const { id } = req.params;
             const cartItem = await cartModel.findOne({ id });

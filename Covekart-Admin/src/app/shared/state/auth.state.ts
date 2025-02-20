@@ -74,7 +74,7 @@ export class AuthState {
 login(ctx: StateContext<AuthStateModel>, action: Login) {
   return this.authService.postAdminLogin(action.payload).pipe(
     tap((response) => {
-     console.log(response);
+     console.log("login admin",response);
      
       ctx.patchState({
         email: response.email,
