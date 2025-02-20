@@ -142,99 +142,81 @@ export const postAddProduct = async (req, res) => {
     }
 };
 
-// export const getProduct = async (req, res) => {
-//     try {
-//         const { page = 1, limit = 10, sort, filter } = req.query;
-//         const skip = (page - 1) * limit;
-
-//         const query = {};
-//         if (filter) {
-
-//         }
-
-//         const [products, total] = await Promise.all([
-//             productModel.find(query)
-//                 .sort(sort || { createdAt: -1 })
-//                 .skip(skip)
-//                 .limit(parseInt(limit))
-//                 .lean(),
-//             productModel.countDocuments(query)
-//         ]);
-
-//         if (!products.length) {
-//             return res.status(404).json({ message: "No products found" });
-//         }
-
-//         res.status(200).json({
-//             data: products,
-//             pagination: {
-//                 total,
-//                 page: parseInt(page),
-//                 pages: Math.ceil(total / limit)
-//             }
-//         });
-
-//     } catch (error) {
-//         console.error("Error in getProduct:", error);
-//         res.status(500).json({
-//             message: "Failed to fetch products",
-//             error: error.message
-//         });
-//     }
-// };
-
 
 
 
 
 // export const getProduct = async (req, res) => {
 //     try {
+//          console.log("Product query params:", req.query);
 
-//         console.log("product query params:", req.query);
-
-//         let { page = 1, limit = 10, sort, filter, status, ids, search, paginate } = req.query;
-//         page = parseInt(page);
-//         limit = parseInt(paginate) || parseInt(limit);
+//         let { page = 1, limit = 10, sort, filter, status, ids, search, paginate, price, rating } = req.query;
+//         page = parseInt(page) || 1;
+//         limit = parseInt(paginate) || parseInt(limit) || 10;
 //         const skip = (page - 1) * limit;
 
-//         // Construct query object
 //         let query = {};
-//         if (status) {
-//             query.status = status;   
-//         }
-//         if (ids) {    
-//             query.id = { $in: ids.split(",").map(id => id.trim()) };
-//         }
+//         if (status) query.status = status;
+//         if (ids) query.id = { $in: ids.split(",").map(id => id.trim()) };
+
 //         if (search) {
 //             query.$or = [
 //                 { name: { $regex: search, $options: "i" } },
 //                 { description: { $regex: search, $options: "i" } }
 //             ];
 //         }
+
 //         if (filter) {
 //             try {
-//                 query = { ...query, ...JSON.parse(filter) }; // Expecting a JSON string in request
+//                 query = { ...query, ...JSON.parse(filter) };
 //             } catch (error) {
 //                 return res.status(400).json({ message: "Invalid filter format" });
 //             }
 //         }
 
+//         if (price) {
+//             const priceRanges = price.split(",").map(range => range.trim());
+//             const priceConditions = priceRanges.map(range => {
+//                 if (range.includes("-")) {
+//                     const [min, max] = range.split("-").map(Number);
+//                     return !isNaN(min) && !isNaN(max) ? { price: { $gte: min, $lte: max } } : null;
+//                 } else {
+//                     const fixedPrice = parseFloat(range);
+//                     return !isNaN(fixedPrice) ? { price: { $lte: fixedPrice } } : null;
+//                 }
+//             }).filter(Boolean);
+//             if (priceConditions.length) {
+//                 query.$or = query.$or ? [...query.$or, ...priceConditions] : priceConditions;
+//             }
+//         }
 
-//         let sortObj = { createdAt: -1 }; // Default sort by latest created
+//         // if (rating) {
+//         //     const minRating = parseFloat(rating);
+//         //     if (!isNaN(minRating)) {
+//         //         query.rating_count = { $gte: minRating };
+//         //     }
+//         // }
+
+//         // Handle rating filtering
+//         if (rating) {
+//             const ratingValues = rating.split(",").map(value => parseFloat(value.trim())).filter(value => !isNaN(value));
+//             if (ratingValues.length) {
+//                 query.rating_count = { $gte: Math.min(...ratingValues) }; // Use the lowest value as the threshold
+//             }
+//         }
+
+
+//         let sortObj = { createdAt: -1 };
 //         if (sort) {
 //             try {
-//                 sortObj = JSON.parse(sort); // Expecting a JSON string in request
+//                 sortObj = JSON.parse(sort);
 //             } catch (error) {
 //                 return res.status(400).json({ message: "Invalid sort format" });
 //             }
 //         }
 
 //         const [products, total] = await Promise.all([
-//             productModel.find(query)
-//                 .sort(sortObj)
-//                 .skip(skip)
-//                 .limit(limit)
-//                 .lean(),
+//             productModel.find(query).sort(sortObj).skip(skip).limit(limit).lean(),
 //             productModel.countDocuments(query)
 //         ]);
 
@@ -242,10 +224,50 @@ export const postAddProduct = async (req, res) => {
 //             return res.status(404).json({ message: "No products found" });
 //         }
 
+//         const modifiedProducts = products.map(product => ({
+//             ...product,
+//             product_thumbnail: product.product_thumbnail?.original_url ? { original_url: product.product_thumbnail.original_url } : null,
+//             size_chart_image: product.size_chart_image?.original_url ? { original_url: product.size_chart_image.original_url } : null,
+//             store: product.store ? { id: product.store.id, store_name: product.store.store_name, slug: product.store.slug } : null,
+//             categories: product.categories?.map(category => ({
+//                 id: category.id,
+//                 category_name: category.category_name,
+//                 slug: category.slug
+//             })) || [],
+//             product_galleries: product.product_galleries?.map(gallery => ({
+//                 id: gallery.id,
+//                 original_url: gallery.original_url
+//             })) || [],
+//             reviews: product.reviews?.map(review => ({
+//                 id: review.id,
+//                 product_id: review.product_id,
+//                 store_id: review.store_id,
+//                 rating: review.rating,
+//                 description: review.description,
+//                 consumer: review.consumer ? {
+//                     id: review.consumer.id,
+//                     name: review.consumer.name,
+//                     email: review.consumer.email
+//                 } : null
+//             })) || [],
+//             user_review: product.user_review?.map(review => ({
+//                 id: review.id,
+//                 product_id: review.product_id,
+//                 store_id: review.store_id,
+//                 rating: review.rating,
+//                 description: review.description,
+//                 consumer: review.consumer ? {
+//                     id: review.consumer.id,
+//                     name: review.consumer.name,
+//                     email: review.consumer.email
+//                 } : null
+//             })) || []
+//         }));
 
+//         // console.log(modifiedProducts);
 
 //         res.status(200).json({
-//             data: products,
+//             data: modifiedProducts,
 //             pagination: {
 //                 total,
 //                 page,
@@ -266,142 +288,445 @@ export const postAddProduct = async (req, res) => {
 
 
 export const getProduct = async (req, res) => {
-    try {
-         console.log("Product query params:", req.query);
-
-        let { page = 1, limit = 10, sort, filter, status, ids, search, paginate, price, rating } = req.query;
-        page = parseInt(page) || 1;
-        limit = parseInt(paginate) || parseInt(limit) || 10;
-        const skip = (page - 1) * limit;
-
-        let query = {};
-        if (status) query.status = status;
-        if (ids) query.id = { $in: ids.split(",").map(id => id.trim()) };
-
-        if (search) {
-            query.$or = [
-                { name: { $regex: search, $options: "i" } },
-                { description: { $regex: search, $options: "i" } }
-            ];
-        }
-
-        if (filter) {
-            try {
-                query = { ...query, ...JSON.parse(filter) };
-            } catch (error) {
-                return res.status(400).json({ message: "Invalid filter format" });
+    //    console.log("product =====", req.query);
+    
+        try {
+            let { 
+                page = 1, 
+                limit = 10, 
+                sort, 
+                filter, 
+                status, 
+                ids, 
+                search, 
+                paginate, 
+                price, 
+                rating,
+                category,
+                tag,
+                attribute
+            } = req.query;
+    
+            // Convert pagination parameters
+            page = parseInt(page) || 1;
+            limit = parseInt(paginate) || parseInt(limit) || 10;
+            const skip = (page - 1) * limit;
+    
+            // Build query object
+            const query = {};
+            const appliedFilters = []; // Track applied filters for error message
+    
+            // Status filter
+            if (status) {
+                query.status = status === 'true' || status === '1';
+                appliedFilters.push(`status: ${status}`);
             }
-        }
-
-        if (price) {
-            const priceRanges = price.split(",").map(range => range.trim());
-            const priceConditions = priceRanges.map(range => {
-                if (range.includes("-")) {
-                    const [min, max] = range.split("-").map(Number);
-                    return !isNaN(min) && !isNaN(max) ? { price: { $gte: min, $lte: max } } : null;
-                } else {
-                    const fixedPrice = parseFloat(range);
-                    return !isNaN(fixedPrice) ? { price: { $lte: fixedPrice } } : null;
+    
+            // IDs filter
+            if (ids) {
+                const idArray = ids.split(',').map(id => id.trim());
+                query.id = { $in: idArray };
+                appliedFilters.push(`IDs: ${ids}`);
+            }
+    
+            // Category filter
+            if (category) {
+                const categoryTerms = category.split(',').map(cat => cat.trim());
+                query.$or = [
+                    { 'categories.slug': { $in: categoryTerms.map(cat => new RegExp(cat, 'i')) } },
+                    { 'categories.category_name': { $in: categoryTerms.map(cat => new RegExp(cat, 'i')) } }
+                ];
+                appliedFilters.push(`categories: ${category}`);
+            }
+    
+            // Search filter
+            if (search) {
+                const searchQuery = {
+                    $or: [
+                        { name: { $regex: search, $options: 'i' } },
+                        { description: { $regex: search, $options: 'i' } },
+                        { short_description: { $regex: search, $options: 'i' } }
+                    ]
+                };
+                query.$and = query.$and || [];
+                query.$and.push(searchQuery);
+                appliedFilters.push(`search term: "${search}"`);
+            }
+    
+            // Price filter
+            if (price) {
+                const priceRanges = price.split(',').map(range => range.trim());
+                const priceConditions = priceRanges.map(range => {
+                    if (range.includes('-')) {
+                        const [min, max] = range.split('-').map(Number);
+                        return !isNaN(min) && !isNaN(max) 
+                            ? { price: { $gte: min, $lte: max } }
+                            : null;
+                    }
+                    const exactPrice = parseFloat(range);
+                    return !isNaN(exactPrice) 
+                        ? { price: exactPrice }
+                        : null;
+                }).filter(Boolean);
+    
+                if (priceConditions.length) {
+                    query.$and = query.$and || [];
+                    query.$and.push({ $or: priceConditions });
+                    appliedFilters.push(`price range: ${price}`);
                 }
-            }).filter(Boolean);
-            if (priceConditions.length) {
-                query.$or = query.$or ? [...query.$or, ...priceConditions] : priceConditions;
             }
-        }
-
-        // if (rating) {
-        //     const minRating = parseFloat(rating);
-        //     if (!isNaN(minRating)) {
-        //         query.rating_count = { $gte: minRating };
-        //     }
-        // }
-
-        // Handle rating filtering
-        if (rating) {
-            const ratingValues = rating.split(",").map(value => parseFloat(value.trim())).filter(value => !isNaN(value));
-            if (ratingValues.length) {
-                query.rating_count = { $gte: Math.min(...ratingValues) }; // Use the lowest value as the threshold
+    
+            // Enhanced Rating filter for comma-separated values
+            if (rating) {
+                const ratingValues = rating.split(',')
+                    .map(r => parseFloat(r.trim()))
+                    .filter(r => !isNaN(r));
+                
+                if (ratingValues.length > 0) {
+                    query.$or = query.$or || [];
+                    // Create conditions for each rating value
+                    const ratingConditions = ratingValues.map(value => ({
+                        rating_count: { $gte: value }
+                    }));
+                    query.$or.push(...ratingConditions);
+                    appliedFilters.push(`ratings: ${ratingValues.join(' or ')}`);
+                }
             }
-        }
-
-
-        let sortObj = { createdAt: -1 };
-        if (sort) {
-            try {
-                sortObj = JSON.parse(sort);
-            } catch (error) {
-                return res.status(400).json({ message: "Invalid sort format" });
+    
+            // Tag filter
+            if (tag) {
+                const tagTerms = tag.split(',').map(t => t.trim());
+                query['tags.slug'] = { $in: tagTerms.map(t => new RegExp(t, 'i')) };
+                appliedFilters.push(`tags: ${tag}`);
             }
-        }
-
-        const [products, total] = await Promise.all([
-            productModel.find(query).sort(sortObj).skip(skip).limit(limit).lean(),
-            productModel.countDocuments(query)
-        ]);
-
-        if (!products.length) {
-            return res.status(404).json({ message: "No products found" });
-        }
-
-        const modifiedProducts = products.map(product => ({
-            ...product,
-            product_thumbnail: product.product_thumbnail?.original_url ? { original_url: product.product_thumbnail.original_url } : null,
-            size_chart_image: product.size_chart_image?.original_url ? { original_url: product.size_chart_image.original_url } : null,
-            store: product.store ? { id: product.store.id, store_name: product.store.store_name, slug: product.store.slug } : null,
-            categories: product.categories?.map(category => ({
-                id: category.id,
-                category_name: category.category_name,
-                slug: category.slug
-            })) || [],
-            product_galleries: product.product_galleries?.map(gallery => ({
-                id: gallery.id,
-                original_url: gallery.original_url
-            })) || [],
-            reviews: product.reviews?.map(review => ({
-                id: review.id,
-                product_id: review.product_id,
-                store_id: review.store_id,
-                rating: review.rating,
-                description: review.description,
-                consumer: review.consumer ? {
-                    id: review.consumer.id,
-                    name: review.consumer.name,
-                    email: review.consumer.email
-                } : null
-            })) || [],
-            user_review: product.user_review?.map(review => ({
-                id: review.id,
-                product_id: review.product_id,
-                store_id: review.store_id,
-                rating: review.rating,
-                description: review.description,
-                consumer: review.consumer ? {
-                    id: review.consumer.id,
-                    name: review.consumer.name,
-                    email: review.consumer.email
-                } : null
-            })) || []
-        }));
-
-        // console.log(modifiedProducts);
-
-        res.status(200).json({
-            data: modifiedProducts,
-            pagination: {
-                total,
-                page,
-                pages: Math.ceil(total / limit)
+    
+            // Additional custom filter
+            if (filter) {
+                try {
+                    const customFilter = JSON.parse(filter);
+                    Object.assign(query, customFilter);
+                    appliedFilters.push(`custom filters: ${filter}`);
+                } catch (error) {
+                    console.error("Invalid filter format:", error);
+                }
             }
-        });
-    } catch (error) {
-        console.error("Error in getProduct:", error);
-        res.status(500).json({
-            message: "Failed to fetch products",
-            error: error.message
-        });
-    }
-};
-
+    
+            // Sort handling
+            let sortObject = { createdAt: -1 }; // Default sort
+            if (sort) {
+                try {
+                    sortObject = typeof sort === 'string' ? JSON.parse(sort) : sort;
+                    appliedFilters.push(`sorting: ${JSON.stringify(sortObject)}`);
+                } catch (error) {
+                    console.error("Invalid sort format:", error);
+                }
+            }
+    
+            // Execute query with pagination
+            const [products, total] = await Promise.all([
+                productModel.find(query)
+                    .sort(sortObject)
+                    .skip(skip)
+                    .limit(limit)
+                    .lean(),
+                productModel.countDocuments(query)
+            ]);
+    
+            if (!products.length) {
+                let message = "No products found";
+                if (appliedFilters.length > 0) {
+                    message += " matching the following criteria: " + appliedFilters.join(", ");
+                }
+                return res.status(404).json({ 
+                    message,
+                    filters: { query, sort: sortObject }
+                });
+            }
+    
+            // Send response
+            res.status(200).json({
+                data: products,
+                pagination: {
+                    total,
+                    page: parseInt(page),
+                    pages: Math.ceil(total / limit)
+                },
+                appliedFilters: {
+                    query,
+                    sort: sortObject
+                }
+            });
+    
+        } catch (error) {
+            console.error("Error in getProduct:", error);
+            res.status(500).json({
+                message: "Failed to fetch products",
+                error: error.message
+            });
+        }
+    };
+    
+    
+    
+    
+    
+    
+    export const getProductF = async (req, res) => {
+        // console.log("product =====", req.query);
+    
+        try {
+            let { 
+                page = 1, 
+                limit = 10, 
+                sort, 
+                filter, 
+                status, 
+                ids, 
+                search, 
+                paginate, 
+                price, 
+                rating,
+                category,
+                tag,
+                attribute,
+                field,
+                sortBy
+            } = req.query;
+    
+            // Convert pagination parameters
+            page = parseInt(page) || 1;
+            limit = parseInt(paginate) || parseInt(limit) || 10;
+            const skip = (page - 1) * limit;
+    
+            // Build query object
+            const query = {};
+            const appliedFilters = []; // Track applied filters for error message
+    
+            // Status filter
+            if (status) {
+                query.status = status === 'true' || status === '1';
+                appliedFilters.push(`status: ${status}`);
+            }
+    
+            // IDs filter
+            if (ids) {
+                const idArray = ids.split(',').map(id => id.trim());
+                query.id = { $in: idArray };
+                appliedFilters.push(`IDs: ${ids}`);
+            }
+    
+            // Category filter - FIXED to properly handle multiple categories
+            if (category) {
+                const categoryTerms = category.split(',').map(cat => cat.trim());
+                
+                // Create an array of category conditions
+                const categoryConditions = [];
+                categoryTerms.forEach(cat => {
+                    categoryConditions.push(
+                        { 'categories.slug': new RegExp(cat, 'i') },
+                        { 'categories.category_name': new RegExp(cat, 'i') }
+                    );
+                });
+                
+                // Add the $or array for category matching
+                query.$or = categoryConditions;
+                appliedFilters.push(`categories: ${category}`);
+            }
+    
+            // Search filter
+            if (search) {
+                const searchQuery = {
+                    $or: [
+                        { name: { $regex: search, $options: 'i' } },
+                        // { description: { $regex: search, $options: 'i' } },
+                        // { short_description: { $regex: search, $options: 'i' } }
+                    ]
+                };
+                query.$and = query.$and || [];
+                query.$and.push(searchQuery);
+                appliedFilters.push(`search term: "${search}"`);
+            }
+    
+            // Price filter - FIXED to handle ranges correctly
+            if (price) {
+                const priceRanges = price.split(',').map(range => range.trim());
+                const priceConditions = [];
+                
+                priceRanges.forEach(range => {
+                    if (range.includes('-')) {
+                        const [min, max] = range.split('-').map(Number);
+                        if (!isNaN(min) && !isNaN(max)) {
+                            priceConditions.push({ price: { $gte: min, $lte: max } });
+                        }
+                    } else {
+                        const exactPrice = parseFloat(range);
+                        if (!isNaN(exactPrice)) {
+                            priceConditions.push({ price: exactPrice });
+                        }
+                    }
+                });
+                
+                if (priceConditions.length) {
+                    // We need to ensure multiple conditions work with other filters
+                    if (!query.$and) query.$and = [];
+                    query.$and.push({ $or: priceConditions });
+                    appliedFilters.push(`price range: ${price}`);
+                }
+            }
+    
+            // Enhanced Rating filter for comma-separated values
+            if (rating) {
+                const ratingValues = rating.split(',')
+                    .map(r => parseFloat(r.trim()))
+                    .filter(r => !isNaN(r));
+                
+                if (ratingValues.length > 0) {
+                    const ratingConditions = ratingValues.map(value => ({
+                        rating_count: { $gte: value }
+                    }));
+                    
+                    if (!query.$and) query.$and = [];
+                    query.$and.push({ $or: ratingConditions });
+                    appliedFilters.push(`ratings: ${ratingValues.join(' or ')}`);
+                }
+            }
+    
+            // Tag filter
+            if (tag) {
+                const tagTerms = tag.split(',').map(t => t.trim());
+                query['tags.slug'] = { $in: tagTerms.map(t => new RegExp(t, 'i')) };
+                appliedFilters.push(`tags: ${tag}`);
+            }
+    
+            // Field-specific filter (handling the field parameter)
+            if (field && field.trim() !== '') {
+                try {
+                    // Assuming field parameter is a field:value format
+                    const [fieldName, fieldValue] = field.split(':').map(f => f.trim());
+                    if (fieldName && fieldValue) {
+                        query[fieldName] = fieldValue;
+                        appliedFilters.push(`${fieldName}: ${fieldValue}`);
+                    }
+                } catch (error) {
+                    console.error("Invalid field format:", error);
+                }
+            }
+    
+            // Additional custom filter
+            if (filter) {
+                try {
+                    const customFilter = JSON.parse(filter);
+                    Object.assign(query, customFilter);
+                    appliedFilters.push(`custom filters: ${filter}`);
+                } catch (error) {
+                    console.error("Invalid filter format:", error);
+                }
+            }
+    
+            // Sort handling - improved to handle sortBy parameter
+            let sortObject = { createdAt: -1 }; // Default sort
+            
+            if (sortBy && sort) {
+                // Handle sortBy with direction
+                const direction = sort.toLowerCase() === 'desc' ? -1 : 1;
+                sortObject = { [sortBy]: direction };
+                appliedFilters.push(`sorting: ${sortBy} ${sort}`);
+            } else if (sort) {
+                try {
+                    sortObject = typeof sort === 'string' ? JSON.parse(sort) : sort;
+                    appliedFilters.push(`sorting: ${JSON.stringify(sortObject)}`);
+                } catch (error) {
+                    console.error("Invalid sort format:", error);
+                }
+            }
+    
+            // Execute query with pagination
+            const [products, total] = await Promise.all([
+                productModel.find(query)
+                    .sort(sortObject)
+                    .skip(skip)
+                    .limit(limit)
+                    .lean(),
+                productModel.countDocuments(query)
+            ]);
+    
+            if (!products.length) {
+                let message = "No products found";
+                if (appliedFilters.length > 0) {
+                    message += " matching the following criteria: " + appliedFilters.join(", ");
+                }
+                return res.status(404).json({ 
+                    message,
+                    filters: { query, sort: sortObject }
+                });
+            }
+    
+            // Transform product data to include only necessary fields
+            const modifiedProducts = products.map(product => ({
+                ...product,
+                product_thumbnail: product.product_thumbnail?.original_url ? { original_url: product.product_thumbnail.original_url } : null,
+                size_chart_image: product.size_chart_image?.original_url ? { original_url: product.size_chart_image.original_url } : null,
+                store: product.store ? { id: product.store.id, store_name: product.store.store_name, slug: product.store.slug } : null,
+                categories: product.categories?.map(category => ({
+                    id: category.id,
+                    category_name: category.category_name,
+                    slug: category.slug
+                })) || [],
+                product_galleries: product.product_galleries?.map(gallery => ({
+                    id: gallery.id,
+                    original_url: gallery.original_url
+                })) || [],
+                reviews: product.reviews?.map(review => ({
+                    id: review.id,
+                    product_id: review.product_id,
+                    store_id: review.store_id,
+                    rating: review.rating,
+                    description: review.description,
+                    consumer: review.consumer ? {
+                        id: review.consumer.id,
+                        name: review.consumer.name,
+                        email: review.consumer.email
+                    } : null
+                })) || [],
+                user_review: product.user_review?.map(review => ({
+                    id: review.id,
+                    product_id: review.product_id,
+                    store_id: review.store_id,
+                    rating: review.rating,
+                    description: review.description,
+                    consumer: review.consumer ? {
+                        id: review.consumer.id,
+                        name: review.consumer.name,
+                        email: review.consumer.email
+                    } : null
+                })) || []
+            }));
+            // console.log("modified",modifiedProducts.length);
+    
+            // Send response
+            res.status(200).json({
+                data: modifiedProducts,
+                pagination: {
+                    total,
+                    pages: Math.ceil(total / limit),
+                    page: parseInt(page)
+                },
+                appliedFilters: {
+                    query,
+                    sort: sortObject
+                }
+            });
+    
+        } catch (error) {
+            console.error("Error in getProduct:", error);
+            res.status(500).json({
+                message: "Failed to fetch products",
+                error: error.message
+            });
+        }
+    };
+    
+    
 
 
 
