@@ -12,7 +12,7 @@ const faqschema = new schema({
     updated_at: { type: Date, required: false },
     deleted_at: { type: Date, required: false },
     
-})
+})  
 
 const faqModel = mongoose.model("faqs", faqschema)
 

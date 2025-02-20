@@ -1,4 +1,4 @@
-import { current_user } from './user_controller.js';
+
 import ProductModel from '../models/product_model.js';
 import userModel from '../models/user_Model.js';
 import reviewModel from '../models/review_model.js'
@@ -26,9 +26,13 @@ const generateNumericId = async () => {
 
 export const postReview = async (req, res) => {
   try {
-   
+    const jwt =req.headers.authorization;
+          const base64Url = jwt.split('.')[1]; 
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const decodedData = JSON.parse(atob(base64));
+
     const product = await ProductModel.findOne({ id: req.body.product_id }).lean();
-    const user = await userModel.findOne({ id: current_user[0].id }).lean();
+    const user = await userModel.findOne({ id: decodedData.id }).lean();
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });

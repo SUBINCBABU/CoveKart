@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const redirectLinkSchema = new mongoose.Schema({
-    link: { type: String, required: true },
+    link: { type:String, required: true },
     link_type: { type: String, required: true },
 });
 
@@ -25,7 +25,7 @@ const RomeThemeSchema = new mongoose.Schema({
             main_banner: { type: bannerSchema, required: true },
             sub_banner_1: { type: bannerSchema, required: true },
             sub_banner_2: { type: bannerSchema, required: true },
-            sub_banner_3: { type: bannerSchema, required: true },
+            sub_banner_3: { type: bannerSchema, required: true },   
         },
         categories_image_list: {
             title: { type: String, required: true },

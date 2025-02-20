@@ -1,5 +1,3 @@
-
-import { current_user } from './user_controller.js';
 import ProductModel from '../models/product_model.js';
 import userModel from '../models/user_Model.js';
 
@@ -7,8 +5,13 @@ import userModel from '../models/user_Model.js';
 export const postWishlist = async (req, res) => {
    
     try {
-
-        if (!current_user || current_user.length === 0) {
+      
+        const jwt =req.headers.authorization;
+          const base64Url = jwt.split('.')[1]; 
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const decodedData = JSON.parse(atob(base64));
+        
+        if (!decodedData) {
             return res.status(401).json({ message: "Unauthorized: No current user found." });
         }
 
@@ -22,7 +25,7 @@ export const postWishlist = async (req, res) => {
 
 
 
-        const user = await userModel.findOne({ id: current_user[0].id }).lean();
+        const user = await userModel.findOne({ id: decodedData.id }).lean();
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
@@ -66,10 +69,15 @@ export const postWishlist = async (req, res) => {
 
 export const getWishlist = async (req, res) => {
     try {
-        if (!current_user || current_user.length === 0) {
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+        
+        if (!decodedData.id) {
             return res.status(200).json({ error: "Current user not found or not logged in." ,data:null});
         }
-        const user = await userModel.findOne({ id: current_user[0].id }).lean();
+        const user = await userModel.findOne({ id: decodedData.id }).lean();
         if (!user) {
             return res.status(404).json({ error: "User not found." });
         }
@@ -91,6 +99,10 @@ export const getWishlist = async (req, res) => {
 export const deleteWishlist = async (req, res) => {
   
     try {
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
 
         let product_id = req.params.id;
 
@@ -103,12 +115,12 @@ export const deleteWishlist = async (req, res) => {
         if (isNaN(product_id)) {
             return res.status(400).json({ message: "Bad Request: Product ID must be a valid number." });
         }
-        if (!current_user || current_user.length === 0) {
+        if (!decodedData.id) {
             return res.status(401).json({ message: "Unauthorized: No current user found." });
         }
 
 
-        const user = await userModel.findOne({ id: current_user[0].id }).lean();
+        const user = await userModel.findOne({ id:decodedData.id }).lean();
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }

@@ -21,17 +21,17 @@ const client = twilio(TWILIO_ACCOUNT, TWILIO_AUTH);
 
 
 const generateNumericId = async () => {
-    const MIN_ID = 10000;
-    const MAX_ID = Number.MAX_SAFE_INTEGER;
+    const MINid = 10000;
+    const MAXid = Number.MAX_SAFE_INTEGER;
 
     try {
         // Find the last tag and increment the ID
         const lastTag = await userModel.findOne({}, { id: 1 }).sort({ id: -1 });
-        let newId = lastTag ? lastTag.id + 1 : MIN_ID;
+        let newId = lastTag ? lastTag.id + 1 : MINid;
 
-        // Reset to MIN_ID if we've reached MAX_ID
-        if (newId > MAX_ID) {
-            newId = MIN_ID;
+        // Reset to MINid if we've reached MAXid
+        if (newId > MAXid) {
+            newId = MINid;
         }
 
         // Ensure the new ID is unique
@@ -258,9 +258,9 @@ export const postLogin = async (req, res) => {
         }
 
         // Generate token
-        const userResp = { email: user.email, name: user.name };
+        const userResp = { email: user.email, id: user.id, name: user.name };
         const secretKey = process.env.JWT_SECRET;
-        const userToken = jwt.sign(userResp, secretKey, { expiresIn: 120 });
+        const userToken = jwt.sign(userResp, secretKey, { expiresIn: 3153600000 });
 
         current_data = {
             token: userToken,
@@ -290,8 +290,7 @@ export const postLogin = async (req, res) => {
 
 let authHeader
 export function verified(req, res, next) {
-  //  console.log(req.headers.authorization);
-
+ 
     authHeader = req.headers.authorization
     if (authHeader == undefined) {
         res.status(400).send({ error: "error token" })
@@ -350,15 +349,21 @@ export const postLogout = async (req, res) => {
 
 
 
-
 export const getUserDetails = async (req, res) => {
     try {
+       
+        const jwt = req.headers.authorization;
+        const base64Url = jwt.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+      
+console.log(jwt);
 
-        if (!current_user || !current_user[0]) {
+        if (!decodedData.id) {
             return res.status(200).json(null); // Send null when no current_user
         }
 
-        const userId = current_user[0].id;
+        const userId = decodedData.id;
 
         // Fetch user details from the database
         const user = await userModel.findOne({ id: userId }).lean();
@@ -383,7 +388,8 @@ export const getUserDetails = async (req, res) => {
                     error: addressError.message,
                 });
             }
-        } //else {
+        }
+        //else {
         // Remove the address field if it's empty or undefined
         // delete user.address;
         // }
@@ -402,17 +408,18 @@ export const getUserDetails = async (req, res) => {
 
 
 
+
 const generateNumericIdForAddress = async () => {
-    const MIN_ID = 1;
-    const MAX_ID = Number.MAX_SAFE_INTEGER;
+    const MINid = 1;
+    const MAXid = Number.MAX_SAFE_INTEGER;
 
     try {
 
         const lastTag = await userAddressModel.findOne({}, { id: 1 }).sort({ id: -1 });
         let lastId = lastTag && Number.isFinite(lastTag.id) ? lastTag.id : 0;
         let addressNewId = lastId + 1;
-        if (addressNewId > MAX_ID) {
-            addressNewId = MIN_ID;
+        if (addressNewId > MAXid) {
+            addressNewId = MINid;
         }
         const existingIdTag = await userAddressModel.findOne({ id: addressNewId });
         if (existingIdTag) {
@@ -432,23 +439,37 @@ const generateNumericIdForAddress = async () => {
 
 export const postCreateUserAddress = async (req, res) => {
     try {
-        const user_id = current_user?.[0]?.id;
-        if (!user_id) {
+
+
+        const jwt = req.headers.authorization;
+        const base64Url = jwt.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+        const userid = decodedData.id
+
+
+       
+        
+        if (!userid) {
+           
             return res.status(400).json({
                 status: "error",
                 message: "User is not authenticated",
             });
         }
-        const User = await userModel.findOne({ id: user_id });
+        const User = await userModel.findOne({ id: userid });
         if (!User) {
+           
             return res.status(400).json({
                 status: "error",
                 message: "Invalid user ID",
             });
         }
+       
         const addressId = await generateNumericIdForAddress();
         const country = await countryModel.findOne({ id: req.body.country_id }).lean();
         if (!country) {
+           
             return res.status(400).json({
                 status: "error",
                 message: "Invalid country ID",
@@ -466,13 +487,13 @@ export const postCreateUserAddress = async (req, res) => {
             id: addressId,
             title: req.body.title,
             street: req.body.street,
-            state_id: req.body.state_id,
-            country_id: req.body.country_id,
+            stateid: req.body.stateid,
+            countryid: req.body.countryid,
             city: req.body.city,
             pincode: req.body.pincode,
             country_code: req.body.country_code,
             phone: req.body.phone,
-            user_id: user_id,
+            userid: userid,
             country: country,
             state: state,
             type: req.body.type,
@@ -482,7 +503,7 @@ export const postCreateUserAddress = async (req, res) => {
 
         const result = await address.save();
         await userModel.findOneAndUpdate(
-            { id: user_id },
+            { id: userid },
             { $push: { address: addressId } }
         );
 
@@ -499,12 +520,12 @@ export const postCreateUserAddress = async (req, res) => {
 
 export const updateUserAddress = async (req, res) => {
     try {
-        const id = req.params.id; // Assume this is the user's unique MongoDB _id
+        const id = req.params.id; // Assume this is the user's unique MongoDB id
         const updateData = req.body;
 
         // Update the user address and return the updated document
         const result = await userAddressModel.findOneAndUpdate(
-            { id: id }, // Use _id for MongoDB documents
+            { id: id }, // Use id for MongoDB documents
             { $set: updateData },
             { new: true } // Return the updated document
         );
@@ -534,13 +555,21 @@ export const updateUserAddress = async (req, res) => {
 export const deleteAddress = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = current_user[0].id;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ status: "error", message: "Unauthorized: No token provided" });
+        }
 
-        if (!id || !userId) {
-            return res.status(400).json({
-                message: "Invalid request: Address ID or User ID is missing",
-                success: false,
-            });
+        let decodedData;
+        try {
+            decodedData = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({ status: "error", message: "Unauthorized: Invalid token" });
+        }
+
+
+        if (!decodedData?.id) {
+            return res.status(400).json({ status: "error", message: "Invalid user data in token" });
         }
 
         const deletedAddress = await userAddressModel.findOneAndDelete(
@@ -562,7 +591,7 @@ export const deleteAddress = async (req, res) => {
         }
 
         // Update user's address list
-        const user = await userModel.findOne({ id: userId }).lean();
+        const user = await userModel.findOne({ id: decodedData.id }).lean();
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
@@ -587,7 +616,7 @@ export const deleteAddress = async (req, res) => {
 
 
         const updatedUser = await userModel.findOneAndUpdate(
-            { id: userId },
+            { id: decodedData.id },
             { $set: { address: updatedAddress } },
             { new: true }
         );
@@ -607,48 +636,65 @@ export const deleteAddress = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
     try {
         const { name } = req.body;
+        const authHeader = req.headers.authorization;
 
-        const userId = current_user[0].id
-        if (!userId) {
-            return res.status(401).json({ message: 'Unauthorized: User ID not found' });
+        if (!authHeader) {
+            return res.status(401).json({ message: 'Unauthorized: Missing token' });
         }
 
-        if (!name) {
-            return res.status(400).json({ message: 'Name is required' });
-        }
+        try {
+            const token = authHeader.split(' ')[1]; // Assuming "Bearer <token>"
+            const base64Url = token.split('.')[1];
+            const decodedData = JSON.parse(Buffer.from(base64Url, 'base64').toString());
 
-       
-        const updatedUser = await userModel.findOneAndUpdate(
-            { id: userId },
-            { $set: { name: name } },
-            { new: true } 
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        const user = await userModel.findOne({ id: userId }).lean()
-        if (user.address && user.address.length > 0) {
-            try {
-                const addresses = await userAddressModel
-                    .find({ id: { $in: user.address } })
-                    .lean();
-                user.address = addresses || [];
-            } catch (addressError) {
-                return res.status(500).json({
-                    status: "error",
-                    message: "Failed to fetch user addresses.",
-                    error: addressError.message,
-                });
+            if (!decodedData || !decodedData.id) {
+                return res.status(401).json({ message: 'Unauthorized: Invalid token' });
             }
-        }
-        return res.status(200).json(user);
 
+            if (!name) {
+                return res.status(400).json({ message: 'Name is required' });
+            }
+
+            const updatedUser = await userModel.findOneAndUpdate(
+                { id: decodedData.id },
+                { $set: { name } },
+                { new: true }
+            ).lean();
+
+            if (!updatedUser) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Fetch user again to include updated details
+            const user = await userModel.findOne({ id: decodedData.id }).lean();
+
+            if (user?.address?.length) {
+                try {
+                    const addresses = await userAddressModel
+                        .find({ id: { $in: user.address } })
+                        .lean();
+                    user.address = addresses || [];
+                } catch (addressError) {
+                    console.error('Address Fetch Error:', addressError);
+                    return res.status(500).json({
+                        status: "error",
+                        message: "Failed to fetch user addresses.",
+                        error: addressError.message,
+                    });
+                }
+            }
+
+            return res.status(200).json(user);
+        } catch (jwtError) {
+            console.error('JWT Decoding Error:', jwtError);
+            return res.status(401).json({ message: 'Unauthorized: Invalid token format' });
+        }
     } catch (error) {
         console.error('Error updating user profile:', error);
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 
 
@@ -667,7 +713,7 @@ async function attributeidGenerate() {
                 isUnique = true;
             }
         }
-        
+
         return newid;
     } catch (error) {
         console.error("Error generating unique ID:", error);
@@ -678,7 +724,7 @@ async function attributeidGenerate() {
 export const postCreateAttribute = async (req, res) => {
     try {
         const data = req.body;
-        console.log(data);
+        
         if (!data.name || !data.status || !data.style) {
             return res.status(400).json({
                 message: "Missing required fields. Please provide name, status, and style"
@@ -733,7 +779,7 @@ export const postCreateAttribute = async (req, res) => {
                 slug: slug,
                 status: Number(data.status),
                 style: data.style.trim(),
-                created_by_id: data.created_by_id || null,
+                created_byid: data.created_byid || null,
                 attribute_values: processedValues,
                 deleted_at: null
             });
@@ -745,7 +791,7 @@ export const postCreateAttribute = async (req, res) => {
             }
             await attribute.save();
 
-            console.log("Attribute Saved Successfully:", attribute);
+           
             res.status(201).json({
                 message: "Attribute created successfully",
                 attribute
@@ -807,135 +853,6 @@ export const getAttribute = async (req, res) => {
     }
 
 }
-// export const putUpdateAttribute = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const data = req.body;
-
-//         // Validate if attribute exists
-//         const existingAttribute = await attributeModel.findOne({ id: id });
-//         if (!existingAttribute) {
-//             return res.status(404).json({
-//                 message: "Attribute not found"
-//             });
-//         }
-
-//         // Validate required fields
-//         if (!data.name || !data.status || !data.style) {
-//             return res.status(400).json({
-//                 message: "Missing required fields. Please provide name, status, and style"
-//             });
-//         }
-
-//         // Generate or validate slug
-//         const newSlug = data.slug || data.name.toLowerCase().replace(/\s+/g, '-');
-
-//         // Check if new slug already exists (excluding current attribute)
-//         const slugExists = await attributeModel.findOne({
-//             slug: newSlug,
-//             id: { $ne: id }
-//         });
-
-//         if (slugExists) {
-//             return res.status(400).json({
-//                 message: "An attribute with this slug already exists"
-//             });
-//         }
-
-//         // Process attribute values if provided
-//         let processedValues = [];
-//         if (Array.isArray(data.value)) {
-//             processedValues = data.value.reduce((validValues, value) => {
-//                 // Skip invalid entries
-//                 if (!value || typeof value !== 'object') {
-//                     console.warn('Skipping invalid attribute value:', value);
-//                     return validValues;
-//                 }
-
-//                 // Validate required fields
-//                 if (!value.value || !value.slug) {
-//                     console.warn('Skipping attribute value missing required fields:', value);
-//                     return validValues;
-//                 }
-
-//                 // Create validated attribute value object
-//                 const processedValue = {
-//                     value: value.value.trim(),
-//                     slug: value.slug.toLowerCase().trim(),
-//                     hex_color: value.hex_color ? value.hex_color.trim() : null,
-//                     updated_at: new Date()
-//                 };
-
-//                 // If value has an ID, it's an existing value being updated
-//                 if (value.id) {
-//                     processedValue.id = value.id;
-//                 } else {
-//                     // New values get new timestamps
-//                     processedValue.created_at = new Date();
-//                     processedValue.deleted_at = null;
-//                 }
-
-//                 validValues.push(processedValue);
-//                 return validValues;
-//             }, []);
-//         }
-
-//         // Prepare update data
-//         const updateData = {
-//             name: data.name.trim(),
-//             slug: newSlug,
-//             status: Number(data.status),
-//             style: data.style.trim(),
-//             updated_at: new Date()
-//         };
-
-//         // If new attribute values are provided, update them
-//         if (processedValues.length > 0) {
-//             updateData.attribute_values = processedValues;
-//         }
-
-//         // Update the attribute
-//         const updatedAttribute = await attributeModel.findOneAndUpdate(
-//             { id: id },
-//             updateData,
-//             { new: true, runValidators: true }
-//         );
-
-//         if (!updatedAttribute) {
-//             return res.status(404).json({
-//                 message: "Attribute not found or update failed"
-//             });
-//         }
-
-//         console.log("Attribute Updated Successfully:", updatedAttribute);
-//         res.status(200).json({
-//             message: "Attribute updated successfully",
-//             attribute: updatedAttribute
-//         });
-
-//     } catch (error) {
-//         console.error("Error updating attribute:", error);
-
-//         if (error.code === 11000) {
-//             return res.status(400).json({
-//                 message: "Duplicate key error. Please ensure slugs are unique.",
-//                 error: error.message
-//             });
-//         }
-
-//         if (error.name === 'ValidationError') {
-//             return res.status(400).json({
-//                 message: "Validation error",
-//                 error: error.message
-//             });
-//         }
-
-//         res.status(500).json({
-//             message: "Internal server error",
-//             error: error.message
-//         });
-//     }
-// };
 
 export const deleteAttribute = async (req, res) => {
     try {
@@ -982,7 +899,7 @@ export const deleteAttribute = async (req, res) => {
             });
         }
 
-        console.log("Attribute Deleted Successfully:", deletedAttribute);
+      
         res.status(200).json({
             message: "Attribute deleted successfully",
             attribute: deletedAttribute

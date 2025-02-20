@@ -25,8 +25,13 @@ const generateNumericId = async () => {
 
 export const getQuestionAnswers = async (req, res) => {
     try {
-        if (!current_user || current_user.length === 0 || !current_user[0].id) {
-            return res.status(200).json({ error: "Current user is not defined or invalid" });
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
         }
         
         const questionAnswers = await questionAnswerModel.find({ product_id: req.params.slug }).lean();
@@ -46,12 +51,20 @@ export const getQuestionAnswers = async (req, res) => {
 
 export const sendQuestion = async (req, res) => {
     try {
+        
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
+        }
         const newQuestionId = await generateNumericId()
         const qans = new questionAnswerModel({
             id: newQuestionId,
             question: req.body.question,
             product_id: req.body.product_id,
-            consumer_id: current_user[0].id,
+            consumer_id: decodedData.id,
             answer: req.body.answer,
         })
         await qans.save()
@@ -69,6 +82,16 @@ export const sendQuestion = async (req, res) => {
 
 export const updateQuestion = async (req, res) => {
     try {
+
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
+        }
+
         const questionUpdateData = {
             $set: {
                 question: req.body.question,
@@ -78,7 +101,7 @@ export const updateQuestion = async (req, res) => {
         const newData = await questionAnswerModel.findOneAndUpdate(
             {
                 $or: [{ product_id: req.body.product_id },
-                { consumer_id: current_user[0].id }]
+                { consumer_id: decodedData.id }]
             },
             questionUpdateData,
             { new: true }
@@ -171,16 +194,27 @@ export const deleteAllQuestionAnswers = async (req, res) => {
     }
 }
 
+
+
 export const sendFeedback = async (req, res) => {
     try {
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+
+        if (!decodedData.id) {
+            return res.status(200).json({ error: " invalid user" });
+        }
+
         const question_and_answer_id = req.body.question_and_answer_id
         const newReaction = req.body.reaction
-        const current_user_id = current_user[0].id;
+        const current_user_id = decodedData.id;
         let feedback
         if (current_user_id) {
             feedback = await questionAnswerModel.findOne({
                 id: question_and_answer_id,
-                consumer_id: current_user[0].id,
+                consumer_id:decodedData.id,
             }).lean();
 
             if (!feedback) {

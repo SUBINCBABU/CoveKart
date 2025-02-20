@@ -98,6 +98,9 @@ export function adminVerified(req, res, next) {
 let current_admin = [];
 
 export const postAdminLogin = async (req, res) => {
+ console.log("admin",req.body);
+ 
+  
   try {
     const { email, password } = req.body;
     if (!email || !password) {
