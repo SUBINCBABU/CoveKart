@@ -28,7 +28,7 @@ import { approveStoreStatus, deleteAllStore, deleteStore, editStore, getStores, 
 import { adminVerified, postAdminLogin,postAdminLogout } from "../controllers/admin_login.js";
 import { getCountry, postCreateCountry } from "../controllers/country.js";
 import { postCreateState,getStates } from "../controllers/state.js";
-import { postAddProduct,getProduct, editProduct, updateProduct, deleteProduct, deleteAllProduct, updateProductStatus, approveProductStatus } from "../controllers/product.js";
+import { postAddProduct,getProduct, editProduct, updateProduct, deleteProduct, deleteAllProduct, updateProductStatus, approveProductStatus, getProductF } from "../controllers/product.js";
 import {  postCreateCategory,getCategory,getCategoryToUpdate,putUpdateCategory,deleteCategory } from "../controllers/category.js";
 import { postCreateTax ,getTax,putUpdateTax,updateTaxStatus,deleteTax,deleteAllTax} from "../controllers/tax.js";
 import { createImages } from "../controllers/cloudinary.js";
@@ -135,7 +135,12 @@ userRouter.post("/createCountry", postCreateCountry)
 userRouter.post("/createStates", postCreateState)
 userRouter.get("/getStates",getStates)
 userRouter.get("/getCountries",getCountry)
-   
+ 
+
+//flutter product
+userRouter.get("/getProductF",getProductF)
+
+
 //product
 userRouter.post("/createProduct",postAddProduct)
 userRouter.get("/getProducts",getProduct)
