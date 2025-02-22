@@ -43,7 +43,7 @@ export class ReviewState {
               total: result?.total ? result?.total : result.data?.length
             }
           });
-          
+
         },
         error: err => {
           console.error('Error fetching reviews:', err);
@@ -53,42 +53,109 @@ export class ReviewState {
     );
   }
 
- 
 
+
+  // @Action(SendReview)
+  // sendReview(ctx: StateContext<ReviewStateModel>, action: SendReview) {
+  //   this.reviewsService.skeletonLoader = true;
+  //   return this.reviewsService.addReview(action.payload).pipe(
+  //     tap({
+  //       next: (result) => {
+  //         const state = ctx.getState();
+  //         ctx.patchState({
+  //           review: {
+  //             data: result.data,
+  //             total: state.review.total + 1,
+  //           },
+  //         });
+  //       },
+  //       complete: () => {
+  //         this.reviewsService.skeletonLoader = false;
+  //       },
+  //       error: (err) => {
+  //         throw new Error(err?.error?.message);
+  //       },
+  //     })
+  //   );
+  // }
+
+
+  
   @Action(SendReview)
   sendReview(ctx: StateContext<ReviewStateModel>, action: SendReview) {
     this.reviewsService.skeletonLoader = true;
     return this.reviewsService.addReview(action.payload).pipe(
       tap({
         next: (result) => {
-            
           const state = ctx.getState();
-
-
           ctx.patchState({
             review: {
               data: result.data,
-              total: state.review.total + 1,
-            },
+              total: result?.total ? result?.total : result.data?.length
+            }
           });
         },
-
         complete: () => {
           this.reviewsService.skeletonLoader = false;
         },
-        
         error: (err) => {
-          throw new Error(err?.error?.message);
-        },
+          console.error('Error sending review:', err);
+          throw new Error(err?.error?.message || 'Failed to send review');
+        }
       })
     );
   }
 
-
+  // @Action(SendQuestion)
+  // sendReview(ctx: StateContext<QuestionStateModel>, action: SendQuestion) {
+  //   this.questionsAnswersService.skeletonLoader = true;
+  //   return this.questionsAnswersService.sendQuestion(action.payload).pipe(
+  //     tap({
+  //       next: (result) => {
+  //         const state = ctx.getState();
+  //         ctx.patchState({
+  //           question: {
+  //             data: result.data,
+  //             total: state.question.total + 1,
+  //           },
+  //         });
+  //       },
+  //       complete: () => {
+  //         this.questionsAnswersService.skeletonLoader = false;
+  //       },
+  //       error: (err) => {
+  //         throw new Error(err?.error?.message);
+  //       },
+  //     })
+  //   );
+  // }
 
   @Action(UpdateReview)
   update(ctx: StateContext<ReviewStateModel>, { payload, id }: UpdateReview) {
-    // Update Review Logic Here
+
+    return this.reviewsService.updateReview(id, payload).pipe(
+      tap({
+        next: (result) => {
+          const state = ctx.getState();
+
+          const updatedReviews = state.review.data.map(review => 
+            review.id === id ? result.data[0] : review
+          );
+
+          ctx.patchState({
+            review: {
+              data: updatedReviews,
+              total: state.review.total
+            }
+          });
+          window.location.reload()
+        },
+        error: (err) => {
+          console.error('Error updating review:', err);
+          throw new Error(err?.error?.message || 'Failed to update review');
+        }
+      })
+    );
   }
 
 

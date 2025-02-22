@@ -56,6 +56,7 @@ export const sendQuestion = async (req, res) => {
         const base64Url = jwt.split('.')[1]; 
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const decodedData = JSON.parse(atob(base64));
+        
         if (!decodedData.id) {
             return res.status(200).json({ error: " invalid user" });
         }

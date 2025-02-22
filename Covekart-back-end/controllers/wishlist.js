@@ -81,6 +81,8 @@ export const getWishlist = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "User not found." });
         }
+       
+        
         if (!user.wishlist || user.wishlist.length === 0) {
             return res.status(404).json({ error: "Wishlist is empty." });
         }
@@ -94,6 +96,36 @@ export const getWishlist = async (req, res) => {
         res.status(500).json({ error: "An internal server error occurred." });
     }
 };
+
+
+
+
+
+export const getWishlistF = async (req, res) => {
+    try {
+        const jwt =req.headers.authorization;
+        const base64Url = jwt.split('.')[1]; 
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedData = JSON.parse(atob(base64));
+        
+        if (!decodedData.id) {
+            return res.status(200).json({ error: "Current user not found or not logged in." ,data:null});
+        }
+        const user = await userModel.findOne({ id: decodedData.id }).lean();
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+       const wishlist=user.wishlist
+        
+        res.status(200).json({ data:wishlist });
+    } catch (error) {
+        console.error("Error in getWhishlist:", error);
+        res.status(500).json({ error: "An internal server error occurred." });
+    }
+};
+
+
+
 
 
 export const deleteWishlist = async (req, res) => {
