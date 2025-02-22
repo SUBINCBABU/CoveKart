@@ -33,7 +33,7 @@ import {  postCreateCategory,getCategory,getCategoryToUpdate,putUpdateCategory,d
 import { postCreateTax ,getTax,putUpdateTax,updateTaxStatus,deleteTax,deleteAllTax} from "../controllers/tax.js";
 import { createImages } from "../controllers/cloudinary.js";
 import { createCart, deleteCart, getCart } from "../controllers/cart.js";
-import {  deleteWishlist, getWishlist, postWishlist } from "../controllers/wishlist.js";
+import {  deleteWishlist, getWishlist, getWishlistF, postWishlist } from "../controllers/wishlist.js";
 import { createTheme, getTheme, updateTheme } from "../controllers/theme.js";
 import { createThemeOption, getThemeOption, updateThemeOption } from "../controllers/theme-option.js";
 import { createRomeTheme, getRomeTheme, updateRomeTheme } from "../controllers/rome-theme.js";
@@ -128,6 +128,9 @@ userRouter.post("/postWishlist",verified,postWishlist)
 userRouter.get("/getWishlist",verified,getWishlist)
 userRouter.delete("/deleteWishlist/:id",verified,deleteWishlist)
 
+
+//flutter wishlist
+userRouter.get("/getWishlistF",verified,getWishlistF)
 
 
 //Country && state
@@ -234,9 +237,9 @@ userRouter.put("/updateThemeOption",updateThemeOption)
 
 
 //Question Answer
-userRouter.post("/sendQuestion",sendQuestion)
-userRouter.get("/getQuestion/:slug",getQuestionAnswers)
-userRouter.post("/updateQuestionAnswers/:id",updateQuestion)
+userRouter.post("/sendQuestion",verified,sendQuestion)
+userRouter.get("/getQuestion/:slug",verified,getQuestionAnswers)
+userRouter.post("/updateQuestionAnswers/:id",verified,updateQuestion)   
 userRouter.get("/getQuestions",getQuestions)  //admin
 userRouter.post("/editQuestionAnswers/:id",EditQuestionAnswers)
 userRouter.post("/updateQuestion/:id",UpdateQuestionAnswers)

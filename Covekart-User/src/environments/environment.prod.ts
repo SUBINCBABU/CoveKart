@@ -8,6 +8,14 @@ export const environment = {
   URL: 'https://angular.pixelstrap.net/fastkart/assets/data',
   configUrl :'https://covekart-api.onrender.com/'
 
+
+
+
+  // production: true,
+  // baseURL: 'https://angular.pixelstrap.net/fastkart',
+  // URL: 'https://angular.pixelstrap.net/fastkart/assets/data',
+  // configUrl :'http://localhost:3000/'
+
 };
 
 /*

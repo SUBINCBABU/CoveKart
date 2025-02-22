@@ -24,18 +24,28 @@ const generateNumericId = async () => {
   }
 };
 
+
 export const postReview = async (req, res) => {
   try {
-    const jwt =req.headers.authorization;
-          const base64Url = jwt.split('.')[1]; 
-          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-          const decodedData = JSON.parse(atob(base64));
+
+    const jwt = req.headers.authorization;
+    const base64Url = jwt.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const decodedData = JSON.parse(atob(base64));
+
+    if (!decodedData.id) {
+      return res.status(200).json({ error: " invalid user" });
+    }
+
 
     const product = await ProductModel.findOne({ id: req.body.product_id }).lean();
     const user = await userModel.findOne({ id: decodedData.id }).lean();
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
+    }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
     const reviewId = await generateNumericId();
     const review = new reviewModel({
@@ -47,17 +57,16 @@ export const postReview = async (req, res) => {
       description: req.body.description,
       consumer_id: user.id,
       consumer: user,
+      product: product,
       consumer_name: user.name,
       review_image: user.profile_image,
-
       product_name: product.name,
       store: product.store,
     });
     const savedReview = await review.save();
 
-
     const productUpdate = {
-      $push: { reviews: review },
+      $push: { reviews: savedReview },
       $set: {
         can_review: true,
         review_count: (product.review_count || 0) + 1,
@@ -71,18 +80,20 @@ export const postReview = async (req, res) => {
       { new: true }
     ).lean();
 
-
     const prod = await ProductModel.findOne({ id: req.body.product_id }).lean();
+    // console.log("ProductModel-review-fetch",prod.review_ratings);
 
+    const arr = prod.review_ratings
+    let totalSum = 0;
+    let starSum = 0;
+    for (let i = 0; i < arr.length; i++) {
+      totalSum += arr[i];
+      starSum += arr[i] * (i + 1);
+    }
+    let rating_count = (starSum / totalSum).toFixed(2);
+    // console.log("review=====rating_count:::",rating_count);
 
-    const totalRating = prod.reviews.reduce((sum, review) => {
-      const rating = parseInt(review.rating, 10);
-      return sum + (isNaN(rating) ? 0 : rating);
-    }, 0);
-
-    const rating_count = prod.reviews.length > 0 ? totalRating / prod.reviews.length : 0;
-
-    if (isNaN(totalRating)) {
+    if (isNaN(rating_count)) {
       const p = await ProductModel.findOneAndUpdate(
         { id: req.body.product_id },
         { $set: { rating_count: 0 } },
@@ -99,8 +110,6 @@ export const postReview = async (req, res) => {
         data: reviews,
         message: "Review added successfully",
       });
-
-
     }
     else {
       const p = await ProductModel.findOneAndUpdate(
@@ -124,14 +133,13 @@ export const postReview = async (req, res) => {
         { $unset: { reviews: "" } },
         { new: true }
       )
-
       const updatedReview = await reviewModel.find({ product_id: req.body.product_id }).lean({})
       await ProductModel.findOneAndUpdate(
         { id: savedReview.id },
         { $set: { reviews: updatedReview } },
         { new: true }
       )
-      const reviews = await reviewModel.find({ product_id: req.body.product_id}).lean({})
+      const reviews = await reviewModel.find({ product_id: req.body.product_id }).lean({})
       return res.status(200).json({
         data: reviews,
         message: "Review added successfully",
@@ -148,12 +156,10 @@ export const postReview = async (req, res) => {
   }
 };
 
-
+// endddddddddddddddddddddd
 export const getReview = async (req, res) => {
   try {
-
     let reviews = await reviewModel.find({ product_id: req.params.slug }).lean({})
-
     res.status(200).json({ data: reviews });
   } catch (error) {
     console.error("Error get review:", error.message);
@@ -164,6 +170,8 @@ export const getReview = async (req, res) => {
   }
 }
 
+
+// Admin review fetch
 export const getReviews = async (req, res) => {
   try {
     let reviews = await reviewModel.find({}).lean({})

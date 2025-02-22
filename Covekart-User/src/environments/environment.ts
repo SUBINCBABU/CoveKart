@@ -8,6 +8,15 @@ export const environment = {
   URL: 'https://covekart-user.onrender.com/assets/data',
   configUrl :'https://covekart-api.onrender.com/'
 
+
+
+  
+  // production: false,
+  // baseURL: 'http://localhost:4200/',
+  // URL: 'http://localhost:4200/assets/data',
+  // configUrl :'http://localhost:3000/'
+
+
 };
 
 /*
